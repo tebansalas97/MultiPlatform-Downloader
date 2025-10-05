@@ -336,6 +336,23 @@ export class YouTubePlatform extends BasePlatform {
 
     args.push(job.url);
 
+    // Validar y sanitizar argumentos
+    const validation = this.validateDownloadArgs(args);
+    if (!validation.valid) {
+      this.log('error', 'Invalid download arguments detected', {
+        errors: validation.errors,
+        jobId: job.id
+      });
+
+      const sanitizedArgs = this.sanitizeDownloadArgs(args);
+      this.log('warn', 'Arguments sanitized', {
+        original: args.length,
+        sanitized: sanitizedArgs.length
+      });
+
+      return sanitizedArgs;
+    }
+
     this.log('debug', 'Download args built', { argsCount: args.length });
 
     return args;
@@ -348,18 +365,21 @@ export class YouTubePlatform extends BasePlatform {
     switch (type) {
       case 'audio':
         return 'bestaudio/best';
-      case 'video':
-        return quality === 'best'
-          ? 'bestvideo[ext=mp4]'
-          : `bestvideo[height<=${quality.replace('p', '')}][ext=mp4]`;
+      case 'video': {
+        const height = this.parseQualityHeight(quality);
+        return height
+          ? `bestvideo[height<=${height}][ext=mp4]/bestvideo[ext=mp4]`
+          : 'bestvideo[ext=mp4]/bestvideo';
+      }
       case 'video-audio':
-      default:
-        if (quality === 'best') {
-          return 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best';
-        } else {
-          const height = quality.replace('p', '');
+      default: {
+        const height = this.parseQualityHeight(quality);
+        if (height) {
           return `bestvideo[height<=${height}][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=${height}]+bestaudio/best`;
+        } else {
+          return 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best';
         }
+      }
     }
   }
 }

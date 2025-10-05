@@ -19,6 +19,7 @@ interface ElectronApi {
   openPath: (path: string) => Promise<void>;
   checkYtDlp: () => Promise<boolean>;
   getSystemInfo: () => any;
+  getFs: () => any;
   isElectron: boolean;
 }
 
@@ -259,18 +260,38 @@ class ElectronApiWrapper implements ElectronApi {
         console.error('Error getting system info:', error);
         return {
           platform: 'unknown',
-          arch: 'unknown', 
+          arch: 'unknown',
           release: 'unknown',
           homedir: '/unknown'
         };
       }
     }
-    
+
     return {
       platform: 'web',
       arch: 'unknown',
       release: 'unknown',
       homedir: '/mock/home'
+    };
+  }
+
+  /**
+   * Obtener módulo fs de Node.js
+   */
+  getFs(): any {
+    if (this.isElectron && this.fs) {
+      return this.fs;
+    }
+
+    // Mock para desarrollo web
+    console.warn('🌐 Web mode: fs module not available, returning mock');
+    return {
+      readdirSync: () => [],
+      existsSync: () => true,
+      readFileSync: () => Buffer.from(''),
+      writeFileSync: () => {},
+      unlinkSync: () => {},
+      renameSync: () => {}
     };
   }
 

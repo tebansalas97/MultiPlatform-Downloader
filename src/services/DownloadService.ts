@@ -526,6 +526,11 @@ Current FFmpeg locations found:
     if (downloadCompleted && !hasFileError && !ffmpegError) {
       console.log('✅ Download completed successfully:', job.title);
 
+      // 🔥 POST-PROCESAMIENTO: Convertir HEVC a H.264 si es necesario
+      if (platform && (platform.type === 'tiktok' || platform.type === 'instagram' || platform.type === 'facebook')) {
+        await this.convertHEVCToH264IfNeeded(job, jobId);
+      }
+
       // 🆕 Registrar éxito en DiagnosticService
       if (platform && downloadStartTime) {
         const duration = Date.now() - downloadStartTime;
@@ -603,19 +608,115 @@ Current FFmpeg locations found:
   }
 
   private analyzeError(stderr: string): { isRecoverable: boolean; message: string } {
+    // Errores específicos de plataformas
+    if (stderr.includes('[twitter]') && stderr.includes('No video could be found')) {
+      return {
+        isRecoverable: false,
+        message: '❌ Twitter/X: Video not accessible. This may be due to:\n' +
+                 '• Private or protected account\n' +
+                 '• Deleted tweet\n' +
+                 '• Age-restricted content\n' +
+                 '• Video removed by Twitter\n\n' +
+                 '💡 Try: Login to Twitter with cookies or use a different tweet'
+      };
+    }
+
+    if (stderr.includes('[twitter]') && stderr.includes('Login required')) {
+      return {
+        isRecoverable: false,
+        message: '🔒 Twitter/X requires authentication.\n' +
+                 '💡 Solution: Export cookies from your browser and configure them in Settings'
+      };
+    }
+
+    if (stderr.includes('[instagram]') && stderr.includes('Login required')) {
+      return {
+        isRecoverable: false,
+        message: '🔒 Instagram requires authentication.\n' +
+                 '💡 Solution: Export cookies from your browser and configure them in Settings'
+      };
+    }
+
+    if (stderr.includes('[tiktok]') && stderr.includes('Unable to download')) {
+      return {
+        isRecoverable: true,
+        message: '⚠️ TikTok download failed - trying alternative method'
+      };
+    }
+
+    if (stderr.includes('This video is unavailable')) {
+      return {
+        isRecoverable: false,
+        message: '❌ Video unavailable (deleted, private, or region-restricted)'
+      };
+    }
+
+    if (stderr.includes('Private video')) {
+      return {
+        isRecoverable: false,
+        message: '🔒 This is a private video and cannot be downloaded'
+      };
+    }
+
+    if (stderr.includes('Video unavailable')) {
+      return {
+        isRecoverable: false,
+        message: '❌ Video unavailable (may be deleted or restricted)'
+      };
+    }
+
+    if (stderr.includes('Sign in to confirm your age')) {
+      return {
+        isRecoverable: false,
+        message: '🔞 Age-restricted content. Login with cookies required.'
+      };
+    }
+
+    // Errores de red
     if (stderr.includes('HTTP Error 403')) {
-      return { isRecoverable: true, message: 'Access forbidden - trying different settings' };
+      return { isRecoverable: true, message: '⚠️ Access forbidden - trying different settings' };
     }
+
+    if (stderr.includes('HTTP Error 429')) {
+      return { isRecoverable: false, message: '⏱️ Rate limited. Please wait a few minutes and try again.' };
+    }
+
+    if (stderr.includes('HTTP Error 404')) {
+      return { isRecoverable: false, message: '❌ Video not found (404)' };
+    }
+
     if (stderr.includes('Unable to download')) {
-      return { isRecoverable: true, message: 'Download failed - retrying' };
+      return { isRecoverable: true, message: '⚠️ Download failed - retrying' };
     }
+
     if (stderr.includes('Connection reset')) {
-      return { isRecoverable: true, message: 'Connection lost - retrying' };
+      return { isRecoverable: true, message: '⚠️ Connection lost - retrying' };
     }
+
+    if (stderr.includes('timeout')) {
+      return { isRecoverable: true, message: '⏱️ Connection timeout - retrying' };
+    }
+
+    // Errores de FFmpeg
     if (stderr.includes('ffmpeg') && stderr.includes('not found')) {
-      return { isRecoverable: false, message: 'FFmpeg not found - cannot merge video and audio' };
+      return {
+        isRecoverable: false,
+        message: '❌ FFmpeg not found - cannot merge video and audio.\n' +
+                 '💡 Solution: Install FFmpeg and configure the path in Settings'
+      };
     }
-    return { isRecoverable: false, message: 'Download failed' };
+
+    // Errores de formato
+    if (stderr.includes('Unsupported URL') || stderr.includes('is not a valid URL')) {
+      return { isRecoverable: false, message: '❌ Invalid or unsupported URL' };
+    }
+
+    if (stderr.includes('No video formats found')) {
+      return { isRecoverable: false, message: '❌ No downloadable video formats available' };
+    }
+
+    // Error genérico
+    return { isRecoverable: false, message: 'Download failed. Check the URL and try again.' };
   }
 
   private shouldRetry(error: string): boolean {
@@ -768,6 +869,88 @@ Current FFmpeg locations found:
 
   getActiveDownloads(): string[] {
     return Array.from(this.activeDownloads.keys());
+  }
+
+  /**
+   * 🔥 Convertir HEVC a H.264 si es necesario para compatibilidad con Windows
+   */
+  private async convertHEVCToH264IfNeeded(job: DownloadJob, jobId: string): Promise<void> {
+    if (!this.ffmpegPath || job.type === 'audio') return;
+
+    try {
+      // Buscar el archivo descargado
+      const { getState } = useDownloadStore;
+      const folder = job.folder;
+      const sanitizedTitle = job.title.replace(/[<>:"/\\|?*]/g, '_').substring(0, 200);
+
+      // Posibles extensiones
+      const possibleFiles = [
+        `${folder}/${sanitizedTitle}.mp4`,
+        `${folder}/${sanitizedTitle}.webm`,
+        `${folder}/${sanitizedTitle}.mkv`
+      ];
+
+      let videoPath: string | null = null;
+
+      // Buscar el archivo que existe
+      const fs = electronApi.getFs();
+      if (!fs) return;
+
+      for (const filePath of possibleFiles) {
+        if (fs.existsSync(filePath)) {
+          videoPath = filePath;
+          break;
+        }
+      }
+
+      if (!videoPath) {
+        console.warn('⚠️ No se encontró el archivo descargado para post-procesar');
+        return;
+      }
+
+      console.log(`🔍 Verificando códec de: ${videoPath}`);
+
+      // Detectar si es HEVC usando ffprobe
+      const { stdout } = await this.executeCommand(this.ffmpegPath.replace('ffmpeg.exe', 'ffprobe.exe'), [
+        '-v', 'error',
+        '-select_streams', 'v:0',
+        '-show_entries', 'stream=codec_name',
+        '-of', 'default=noprint_wrappers=1:nokey=1',
+        videoPath
+      ]);
+
+      const codec = stdout.trim();
+
+      if (codec === 'hevc' || codec === 'h265') {
+        console.log('🔥 Detectado HEVC! Convirtiendo a H.264...');
+
+        const tempPath = videoPath.replace('.mp4', '.temp.mp4');
+
+        // Convertir a H.264
+        await this.executeCommand(this.ffmpegPath, [
+          '-i', videoPath,
+          '-c:v', 'libx264',
+          '-preset', 'veryfast',
+          '-crf', '23',
+          '-c:a', 'aac',
+          '-b:a', '128k',
+          '-movflags', '+faststart',
+          '-y',
+          tempPath
+        ]);
+
+        // Reemplazar el archivo original
+        fs.unlinkSync(videoPath);
+        fs.renameSync(tempPath, videoPath);
+
+        console.log('✅ Video convertido exitosamente a H.264');
+      } else {
+        console.log(`✅ Video ya está en ${codec}, no requiere conversión`);
+      }
+    } catch (error) {
+      console.error('❌ Error al convertir HEVC:', error);
+      // No fallar la descarga por un error de conversión
+    }
   }
 
   private async executeCommand(command: string, args: string[]): Promise<SpawnResult> {

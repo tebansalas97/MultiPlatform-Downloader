@@ -199,15 +199,12 @@ export class TikTokPlatform extends BasePlatform {
     // Tipo de descarga
     if (job.type === 'video-audio') {
       // Video con audio (mejor calidad)
-      args.push('-f', 'best[ext=mp4]');
+      // Descargar sin conversión, el post-procesamiento se hará después
+      args.push('-f', 'best[ext=mp4]/best');
       args.push('--merge-output-format', 'mp4');
-
-      if (ffmpegPath) {
-        args.push('--postprocessor-args', 'ffmpeg:-c:v copy -c:a aac -b:a 128k');
-      }
     } else if (job.type === 'video') {
       // Solo video (sin audio)
-      args.push('-f', 'bestvideo[ext=mp4]');
+      args.push('-f', 'bestvideo[ext=mp4]/bestvideo');
       args.push('--merge-output-format', 'mp4');
     } else if (job.type === 'audio') {
       // Solo audio
@@ -217,10 +214,13 @@ export class TikTokPlatform extends BasePlatform {
       args.push('--audio-quality', '192');
     }
 
-    // Calidad específica
-    if (job.quality && job.type !== 'audio') {
-      const height = parseInt(job.quality.replace('p', ''));
-      args.push('-f', `best[height<=${height}]`);
+    // Calidad específica (solo si es válida)
+    if (job.type !== 'audio') {
+      const height = this.parseQualityHeight(job.quality);
+
+      if (height) {
+        args.push('-f', `best[height<=${height}]`);
+      }
     }
 
     // Output template
@@ -233,6 +233,23 @@ export class TikTokPlatform extends BasePlatform {
 
     // URL
     args.push(job.url);
+
+    // Validar y sanitizar argumentos
+    const validation = this.validateDownloadArgs(args);
+    if (!validation.valid) {
+      this.log('error', 'Invalid download arguments detected', {
+        errors: validation.errors,
+        jobId: job.id
+      });
+
+      const sanitizedArgs = this.sanitizeDownloadArgs(args);
+      this.log('warn', 'Arguments sanitized', {
+        original: args.length,
+        sanitized: sanitizedArgs.length
+      });
+
+      return sanitizedArgs;
+    }
 
     this.log('debug', 'TikTok download args built', { args: args.length });
 

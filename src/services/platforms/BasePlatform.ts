@@ -213,4 +213,83 @@ export abstract class BasePlatform {
   getColor(): string {
     return this.config.color;
   }
+
+  /**
+   * Parsear calidad de video de forma segura
+   * Retorna null si la calidad no es válida o es 'best'
+   */
+  protected parseQualityHeight(quality: string | undefined): number | null {
+    if (!quality || quality === 'best' || quality === 'worst') {
+      return null;
+    }
+
+    // Remover 'p' y cualquier sufijo adicional (ej: '1080p60' -> '1080')
+    const match = quality.match(/^(\d+)p?/);
+    if (!match) {
+      return null;
+    }
+
+    const height = parseInt(match[1], 10);
+
+    // Validar que sea un número válido y razonable
+    if (isNaN(height) || height <= 0 || height > 8192) {
+      return null;
+    }
+
+    return height;
+  }
+
+  /**
+   * Validar argumentos antes de pasar a yt-dlp
+   * Previene errores por argumentos inválidos
+   */
+  protected validateDownloadArgs(args: string[]): { valid: boolean; errors: string[] } {
+    const errors: string[] = [];
+
+    // Buscar argumentos con valores inválidos
+    for (let i = 0; i < args.length; i++) {
+      const arg = args[i];
+
+      // Verificar NaN en argumentos
+      if (typeof arg === 'string' && arg.includes('NaN')) {
+        errors.push(`Invalid argument contains NaN: ${arg}`);
+      }
+
+      // Verificar undefined o null
+      if (arg === undefined || arg === null || arg === 'undefined' || arg === 'null') {
+        errors.push(`Invalid argument at position ${i}: ${arg}`);
+      }
+
+      // Verificar formato de height
+      if (arg.includes('height<=') && arg.includes('NaN')) {
+        errors.push(`Invalid height filter: ${arg}`);
+      }
+    }
+
+    return {
+      valid: errors.length === 0,
+      errors
+    };
+  }
+
+  /**
+   * Sanitizar argumentos antes de ejecutar
+   * Remueve o corrige argumentos problemáticos
+   */
+  protected sanitizeDownloadArgs(args: string[]): string[] {
+    return args.filter(arg => {
+      // Remover argumentos inválidos
+      if (!arg || arg === 'undefined' || arg === 'null') {
+        return false;
+      }
+
+      // Remover argumentos con NaN
+      if (typeof arg === 'string' && arg.includes('NaN')) {
+        this.log('warn', `Removed invalid argument: ${arg}`);
+        return false;
+      }
+
+      return true;
+    });
+  }
 }

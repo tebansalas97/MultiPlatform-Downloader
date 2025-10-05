@@ -195,10 +195,36 @@ export class TwitterPlatform extends BasePlatform {
       args.push('--ffmpeg-location', ffmpegPath);
     }
 
+    // Opciones de autenticación para Twitter (si están configuradas)
+    // TODO: Agregar soporte para cookies desde configuración
+    // if (cookiesPath) {
+    //   args.push('--cookies', cookiesPath);
+    // }
+
+    // Opciones específicas de Twitter para mejor compatibilidad
+    args.push('--no-warnings');
+    args.push('--no-check-certificate');
+
+    // Agregar user-agent para evitar bloqueos
+    args.push('--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+
+    // Agregar referer para Twitter
+    args.push('--add-header', 'Referer:https://twitter.com/');
+
     // Tipo de descarga
     if (job.type === 'video-audio') {
       // Video con audio (mejor calidad)
-      args.push('-f', 'best[ext=mp4]');
+      // Twitter generalmente tiene video y audio separados, necesitamos formato que los combine
+      const height = this.parseQualityHeight(job.quality);
+
+      if (height) {
+        // Con calidad específica
+        args.push('-f', `bestvideo[height<=${height}][ext=mp4]+bestaudio[ext=m4a]/best[height<=${height}][ext=mp4]/best[ext=mp4]`);
+      } else {
+        // Mejor calidad disponible
+        args.push('-f', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best');
+      }
+
       args.push('--merge-output-format', 'mp4');
 
       if (ffmpegPath) {
@@ -206,31 +232,47 @@ export class TwitterPlatform extends BasePlatform {
       }
     } else if (job.type === 'video') {
       // Solo video
-      args.push('-f', 'bestvideo[ext=mp4]');
+      const height = this.parseQualityHeight(job.quality);
+
+      if (height) {
+        args.push('-f', `bestvideo[height<=${height}][ext=mp4]/bestvideo[ext=mp4]`);
+      } else {
+        args.push('-f', 'bestvideo[ext=mp4]/bestvideo');
+      }
+
       args.push('--merge-output-format', 'mp4');
     } else if (job.type === 'audio') {
       // Solo audio
-      args.push('-f', 'bestaudio');
+      args.push('-f', 'bestaudio/best');
       args.push('-x');
       args.push('--audio-format', 'mp3');
       args.push('--audio-quality', '192');
-    }
-
-    // Calidad específica
-    if (job.quality && job.type !== 'audio') {
-      const height = parseInt(job.quality.replace('p', ''));
-      args.push('-f', `best[height<=${height}]`);
     }
 
     // Output template
     const outputTemplate = '%(title).200s.%(ext)s';
     args.push('-o', `${job.folder}/${outputTemplate}`);
 
-    // Opciones adicionales de Twitter
-    args.push('--no-warnings');
-
     // URL
     args.push(job.url);
+
+    // Validar y sanitizar argumentos antes de retornar
+    const validation = this.validateDownloadArgs(args);
+    if (!validation.valid) {
+      this.log('error', 'Invalid download arguments detected', {
+        errors: validation.errors,
+        jobId: job.id
+      });
+
+      // Sanitizar y continuar
+      const sanitizedArgs = this.sanitizeDownloadArgs(args);
+      this.log('warn', 'Arguments sanitized', {
+        original: args.length,
+        sanitized: sanitizedArgs.length
+      });
+
+      return sanitizedArgs;
+    }
 
     this.log('debug', 'Twitter download args built', { args: args.length });
 

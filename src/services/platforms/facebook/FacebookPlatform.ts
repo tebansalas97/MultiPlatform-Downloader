@@ -207,12 +207,20 @@ export class FacebookPlatform extends BasePlatform {
       args.push('--merge-output-format', 'mp4');
 
       if (ffmpegPath) {
-        args.push('--postprocessor-args', 'ffmpeg:-c:v copy -c:a aac -b:a 128k');
+        // Re-codificar a H.264 para compatibilidad universal
+        args.push('--recode-video', 'mp4');
+        args.push('--postprocessor-args', 'ffmpeg:-c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k');
       }
     } else if (job.type === 'video') {
       // Solo video
       args.push('-f', 'bestvideo[ext=mp4]/bestvideo');
       args.push('--merge-output-format', 'mp4');
+
+      if (ffmpegPath) {
+        // Re-codificar a H.264
+        args.push('--recode-video', 'mp4');
+        args.push('--postprocessor-args', 'ffmpeg:-c:v libx264 -preset fast -crf 23');
+      }
     } else if (job.type === 'audio') {
       // Solo audio
       args.push('-f', 'bestaudio');
@@ -221,10 +229,13 @@ export class FacebookPlatform extends BasePlatform {
       args.push('--audio-quality', '192');
     }
 
-    // Calidad específica
-    if (job.quality && job.type !== 'audio') {
-      const height = parseInt(job.quality.replace('p', ''));
-      args.push('-f', `best[height<=${height}]/bestvideo[height<=${height}]+bestaudio`);
+    // Calidad específica (solo si es válida)
+    if (job.type !== 'audio') {
+      const height = this.parseQualityHeight(job.quality);
+
+      if (height) {
+        args.push('-f', `best[height<=${height}]/bestvideo[height<=${height}]+bestaudio`);
+      }
     }
 
     // Output template
@@ -236,6 +247,23 @@ export class FacebookPlatform extends BasePlatform {
 
     // URL
     args.push(job.url);
+
+    // Validar y sanitizar argumentos
+    const validation = this.validateDownloadArgs(args);
+    if (!validation.valid) {
+      this.log('error', 'Invalid download arguments detected', {
+        errors: validation.errors,
+        jobId: job.id
+      });
+
+      const sanitizedArgs = this.sanitizeDownloadArgs(args);
+      this.log('warn', 'Arguments sanitized', {
+        original: args.length,
+        sanitized: sanitizedArgs.length
+      });
+
+      return sanitizedArgs;
+    }
 
     this.log('debug', 'Facebook download args built', { args: args.length });
 
