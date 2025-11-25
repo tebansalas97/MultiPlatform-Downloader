@@ -13,6 +13,7 @@ interface SpawnResult {
   code: number;
   stdout: string;
   stderr: string;
+  downloadedFilePath?: string; // 🆕 Path del archivo realmente descargado por yt-dlp
 }
 
 export class DownloadService {
@@ -56,6 +57,66 @@ export class DownloadService {
     }
   }
 
+  /**
+   * Obtiene rutas comunes donde FFmpeg podría estar instalado
+   * Genera rutas dinámicamente según el sistema operativo
+   */
+  private getCommonFFmpegPaths(): string[] {
+    const paths: string[] = [];
+    const isWindows = process.platform === 'win32';
+    
+    if (isWindows) {
+      // Obtener directorio home del usuario dinámicamente
+      const userHome = process.env.USERPROFILE || process.env.HOME || '';
+      const appData = process.env.LOCALAPPDATA || '';
+      const programFiles = process.env.PROGRAMFILES || 'C:\\Program Files';
+      const programFilesX86 = process.env['PROGRAMFILES(X86)'] || 'C:\\Program Files (x86)';
+      
+      // Rutas comunes en Windows
+      paths.push(
+        // Rutas en AppData del usuario (instalaciones locales)
+        `${appData}\\Programs\\ffmpeg\\bin\\ffmpeg.exe`,
+        `${appData}\\ffmpeg\\bin\\ffmpeg.exe`,
+        // Rutas en Documents del usuario
+        `${userHome}\\Documents\\bin\\ffmpeg.exe`,
+        `${userHome}\\Documents\\ffmpeg\\bin\\ffmpeg.exe`,
+        // Rutas globales de sistema
+        `${programFiles}\\ffmpeg\\bin\\ffmpeg.exe`,
+        `${programFilesX86}\\ffmpeg\\bin\\ffmpeg.exe`,
+        `C:\\ffmpeg\\bin\\ffmpeg.exe`,
+        // Chocolatey
+        `C:\\ProgramData\\chocolatey\\lib\\ffmpeg\\tools\\ffmpeg\\bin\\ffmpeg.exe`,
+        // Scoop
+        `${userHome}\\scoop\\apps\\ffmpeg\\current\\bin\\ffmpeg.exe`,
+        // Rutas adicionales comunes
+        `C:\\Path-yt-dlp\\ffmpeg.exe`
+      );
+      
+      // Buscar en carpetas de WinGet (patrón genérico)
+      if (appData) {
+        const wingetBase = `${appData}\\Microsoft\\WinGet\\Packages`;
+        paths.push(
+          `${wingetBase}\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-7.0-full_build\\bin\\ffmpeg.exe`,
+          `${wingetBase}\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-7.1-full_build\\bin\\ffmpeg.exe`,
+          `${wingetBase}\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.0-full_build\\bin\\ffmpeg.exe`
+        );
+      }
+    } else {
+      // macOS y Linux
+      const userHome = process.env.HOME || '';
+      
+      paths.push(
+        '/usr/local/bin/ffmpeg',
+        '/usr/bin/ffmpeg',
+        '/opt/homebrew/bin/ffmpeg',
+        `${userHome}/.local/bin/ffmpeg`,
+        '/snap/bin/ffmpeg'
+      );
+    }
+    
+    return paths;
+  }
+
   private async detectFFmpegPath(): Promise<string | null> {
     if (!electronApi.isElectron) {
       console.warn('Not running in Electron - FFmpeg detection skipped');
@@ -90,16 +151,8 @@ export class DownloadService {
       console.warn('⚠️ where/which search failed:', error);
     }
 
-    // Paso 2: Probar rutas comunes específicas
-    const commonPaths = [
-      'C:\\Users\\Esteban\\Documents\\bin\\bin\\ffmpeg.exe',
-      'C:\\Path-yt-dlp\\ffmpeg.exe',
-      'C:\\Users\\Esteban\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.0-full_build\\bin\\ffmpeg.exe',
-      'C:\\ffmpeg\\bin\\ffmpeg.exe',
-      'C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe',
-      '/usr/local/bin/ffmpeg',
-      '/usr/bin/ffmpeg'
-    ];
+    // Paso 2: Construir rutas dinámicamente basadas en el sistema operativo
+    const commonPaths = this.getCommonFFmpegPaths();
 
     console.log('🔍 Testing common FFmpeg paths...');
     for (const testPath of commonPaths) {
@@ -133,19 +186,29 @@ export class DownloadService {
   }
 
   private showFFmpegInstallGuide(): void {
+    const isWindows = process.platform === 'win32';
+    const installCmd = isWindows 
+      ? 'winget install --id=Gyan.FFmpeg -e'
+      : 'brew install ffmpeg  # macOS\nsudo apt install ffmpeg  # Ubuntu/Debian';
+    
     const instructions = `🔧 CRITICAL: FFmpeg is Required!
 
-You have FFmpeg installed but it's not being detected properly.
+FFmpeg was not detected on your system.
 
-Quick Fix:
-1. Restart the application
-2. If problem persists, run: winget install --id=Gyan.FFmpeg -e
-3. Restart your computer
-
-Current FFmpeg locations found:
-- C:\\Users\\Esteban\\Documents\\bin\\bin\\ffmpeg.exe
-- C:\\Path-yt-dlp\\ffmpeg.exe
-- WinGet installation path`;
+Installation Options:
+${isWindows ? `
+Windows:
+1. Run in terminal: ${installCmd}
+2. Or download from: https://ffmpeg.org/download.html
+3. Make sure FFmpeg is in your PATH
+4. Restart the application
+` : `
+macOS/Linux:
+1. macOS: brew install ffmpeg
+2. Ubuntu/Debian: sudo apt install ffmpeg
+3. Fedora: sudo dnf install ffmpeg
+4. Restart the application
+`}`;
 
     console.error(instructions);
     
@@ -306,6 +369,7 @@ Current FFmpeg locations found:
       let stdout = '';
       let stderr = '';
       let hasCompleted = false;
+      let downloadedFilePath = ''; // 🆕 Capturar el archivo descargado
 
       this.activeDownloads.set(jobId, process);
 
@@ -326,6 +390,29 @@ Current FFmpeg locations found:
       process.stdout.on('data', (data: Buffer) => {
         const line = data.toString();
         stdout += line;
+        
+        // 🆕 Capturar el nombre del archivo descargado desde diferentes mensajes de yt-dlp
+        // Formato: [download] Destination: /path/to/file.mp4
+        // Formato: [Merger] Merging formats into "/path/to/file.mp4"
+        // Formato: [download] /path/to/file.mp4 has already been downloaded
+        const destinationMatch = line.match(/\[download\] Destination: (.+)$/m);
+        const mergerMatch = line.match(/\[Merger\] Merging formats into "(.+)"$/m);
+        const alreadyDownloadedMatch = line.match(/\[download\] (.+) has already been downloaded/m);
+        const ffmpegDestMatch = line.match(/\[ffmpeg\] Destination: (.+)$/m);
+        
+        if (destinationMatch) {
+          downloadedFilePath = destinationMatch[1].trim();
+          console.log('📁 Detected download destination:', downloadedFilePath);
+        } else if (mergerMatch) {
+          downloadedFilePath = mergerMatch[1].trim();
+          console.log('📁 Detected merged file:', downloadedFilePath);
+        } else if (alreadyDownloadedMatch) {
+          downloadedFilePath = alreadyDownloadedMatch[1].trim();
+          console.log('📁 File already downloaded:', downloadedFilePath);
+        } else if (ffmpegDestMatch) {
+          downloadedFilePath = ffmpegDestMatch[1].trim();
+          console.log('📁 Detected ffmpeg destination:', downloadedFilePath);
+        }
         
         if (line.includes('[download]') && line.includes('%')) {
           const progressMatch = line.match(/(\d+\.?\d*)%/);
@@ -362,7 +449,8 @@ Current FFmpeg locations found:
 
       process.on('close', (code: number) => {
         cleanup();
-        resolve({ code, stdout, stderr });
+        // 🆕 Incluir el path del archivo descargado en el resultado
+        resolve({ code, stdout, stderr, downloadedFilePath });
       });
 
       process.on('error', (error: Error) => {
@@ -500,7 +588,7 @@ Current FFmpeg locations found:
     downloadStartTime?: number
   ): Promise<void> {
     const { updateJob, moveToHistory } = useDownloadStore.getState();
-    const { code, stdout, stderr } = result;
+    const { code, stdout, stderr, downloadedFilePath } = result;
 
     const downloadCompleted = stdout.includes('100%') || stdout.includes('has already been downloaded');
     const mergeSuccess = stdout.includes('[Merger]') || stdout.includes('Merging formats') || stdout.includes('[ffmpeg]');
@@ -515,7 +603,8 @@ Current FFmpeg locations found:
       ffmpegError,
       ffmpegWarning,
       exitCode: code,
-      jobType: job.type
+      jobType: job.type,
+      downloadedFilePath // 🆕 Log del archivo detectado
     });
 
     // ✅ Para video+audio, verificar que el merge se haya realizado
@@ -528,7 +617,7 @@ Current FFmpeg locations found:
 
       // 🔥 POST-PROCESAMIENTO: Convertir HEVC a H.264 si es necesario
       if (platform && (platform.type === 'tiktok' || platform.type === 'instagram' || platform.type === 'facebook')) {
-        await this.convertHEVCToH264IfNeeded(job, jobId);
+        await this.convertHEVCToH264IfNeeded(job, jobId, downloadedFilePath);
       }
 
       // 🆕 Registrar éxito en DiagnosticService
@@ -778,6 +867,61 @@ Current FFmpeg locations found:
     }
   }
 
+  /**
+   * Obtiene la URL de streaming directa del video para reproducción in-app
+   * Usa yt-dlp para extraer la URL del stream
+   */
+  async getStreamUrl(url: string): Promise<{ videoUrl: string; audioUrl?: string; isDirectPlayable: boolean }> {
+    return new Promise((resolve, reject) => {
+      if (!electronApi.isElectron) {
+        reject(new Error('Stream URL only available in Electron'));
+        return;
+      }
+
+      // Obtener la mejor URL de video con audio combinado, o separados
+      const process = electronApi.spawn('yt-dlp', [
+        '--get-url',
+        '-f', 'best[ext=mp4]/best', // Preferir MP4 para compatibilidad con HTML5
+        '--no-playlist',
+        url
+      ]);
+
+      let output = '';
+      let errorOutput = '';
+
+      process.stdout.on('data', (data: Buffer) => {
+        output += data.toString();
+      });
+
+      process.stderr.on('data', (data: Buffer) => {
+        errorOutput += data.toString();
+      });
+
+      process.on('close', (code: number) => {
+        if (code === 0 && output.trim()) {
+          const urls = output.trim().split('\n').filter(u => u.startsWith('http'));
+          
+          if (urls.length >= 1) {
+            resolve({
+              videoUrl: urls[0],
+              audioUrl: urls[1] || undefined,
+              isDirectPlayable: true
+            });
+          } else {
+            reject(new Error('No playable URL found'));
+          }
+        } else {
+          console.error('yt-dlp stream URL error:', errorOutput);
+          reject(new Error('Failed to get stream URL'));
+        }
+      });
+
+      process.on('error', (err) => {
+        reject(new Error(`Process error: ${err.message}`));
+      });
+    });
+  }
+
   private async getVideoInfoDirect(url: string): Promise<VideoInfo> {
     return new Promise((resolve, reject) => {
       const process = electronApi.spawn('yt-dlp', [
@@ -874,32 +1018,77 @@ Current FFmpeg locations found:
   /**
    * 🔥 Convertir HEVC a H.264 si es necesario para compatibilidad con Windows
    */
-  private async convertHEVCToH264IfNeeded(job: DownloadJob, jobId: string): Promise<void> {
+  private async convertHEVCToH264IfNeeded(job: DownloadJob, jobId: string, downloadedFilePath?: string): Promise<void> {
     if (!this.ffmpegPath || job.type === 'audio') return;
 
     try {
-      // Buscar el archivo descargado
-      const { getState } = useDownloadStore;
-      const folder = job.folder;
-      const sanitizedTitle = job.title.replace(/[<>:"/\\|?*]/g, '_').substring(0, 200);
-
-      // Posibles extensiones
-      const possibleFiles = [
-        `${folder}/${sanitizedTitle}.mp4`,
-        `${folder}/${sanitizedTitle}.webm`,
-        `${folder}/${sanitizedTitle}.mkv`
-      ];
+      const fs = electronApi.getFs();
+      const path = electronApi.getPath();
+      if (!fs || !path) return;
 
       let videoPath: string | null = null;
 
-      // Buscar el archivo que existe
-      const fs = electronApi.getFs();
-      if (!fs) return;
+      // 🆕 ESTRATEGIA 0: Usar el archivo capturado directamente de yt-dlp (más confiable)
+      if (downloadedFilePath && fs.existsSync(downloadedFilePath)) {
+        videoPath = downloadedFilePath;
+        console.log(`📁 Usando archivo detectado de yt-dlp: ${videoPath}`);
+      }
 
-      for (const filePath of possibleFiles) {
-        if (fs.existsSync(filePath)) {
-          videoPath = filePath;
-          break;
+      // Estrategia 1: Buscar con título sanitizado (fallback)
+      if (!videoPath) {
+        const folder = job.folder;
+        const titleVariants = [
+          job.title.replace(/[<>:"/\\|?*]/g, '_').substring(0, 200),
+          job.title.replace(/[<>:"/\\|?*[\]]/g, '_').substring(0, 200),
+          job.title.substring(0, 200).replace(/[^\w\s\-_.()]/g, '_'),
+        ];
+        const extensions = ['mp4', 'webm', 'mkv', 'mov'];
+
+        for (const title of titleVariants) {
+          for (const ext of extensions) {
+            const filePath = path.join(folder, `${title}.${ext}`);
+            if (fs.existsSync(filePath)) {
+              videoPath = filePath;
+              console.log(`📁 Encontrado con título sanitizado: ${filePath}`);
+              break;
+            }
+          }
+          if (videoPath) break;
+        }
+      }
+
+      // Estrategia 2: Buscar archivo más reciente en la carpeta con extensión de video
+      if (!videoPath) {
+        try {
+          const folder = job.folder;
+          const extensions = ['mp4', 'webm', 'mkv', 'mov'];
+          const files = fs.readdirSync(folder);
+          const videoFiles = files.filter((f: string) => 
+            extensions.some(ext => f.toLowerCase().endsWith(`.${ext}`))
+          );
+          
+          if (videoFiles.length > 0) {
+            let newestFile = videoFiles[0];
+            let newestTime = 0;
+            
+            for (const file of videoFiles) {
+              const filePath = path.join(folder, file);
+              const stats = fs.statSync(filePath);
+              if (stats.mtimeMs > newestTime) {
+                newestTime = stats.mtimeMs;
+                newestFile = file;
+              }
+            }
+            
+            // Solo usar si fue modificado en los últimos 60 segundos
+            const now = Date.now();
+            if (now - newestTime < 60000) {
+              videoPath = path.join(folder, newestFile);
+              console.log(`📁 Usando archivo más reciente: ${newestFile}`);
+            }
+          }
+        } catch (e) {
+          console.warn('⚠️ Error buscando archivos recientes:', e);
         }
       }
 
@@ -911,7 +1100,8 @@ Current FFmpeg locations found:
       console.log(`🔍 Verificando códec de: ${videoPath}`);
 
       // Detectar si es HEVC usando ffprobe
-      const { stdout } = await this.executeCommand(this.ffmpegPath.replace('ffmpeg.exe', 'ffprobe.exe'), [
+      const ffprobePath = this.ffmpegPath.replace('ffmpeg.exe', 'ffprobe.exe').replace('ffmpeg', 'ffprobe');
+      const { stdout } = await this.executeCommand(ffprobePath, [
         '-v', 'error',
         '-select_streams', 'v:0',
         '-show_entries', 'stream=codec_name',

@@ -2,6 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ==============================================
+   THREE THEMES: Default (Premium Blue), Dark, Light
+   ============================================== */
+
+:root {
+  /* Default theme - Premium Blue gradient aesthetic */
+  --bg-primary: #0a0f1a;
+  --bg-secondary: #111827;
+  --bg-tertiary: #1e293b;
+  --bg-card: #0f172a;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-color: #1e3a5f;
+  --accent-color: #3b82f6;
+  --accent-glow: rgba(59, 130, 246, 0.3);
+}
+
+/* Dark Mode - Pure dark grays, NO blue tint */
+html.dark {
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #141414;
+  --bg-tertiary: #1f1f1f;
+  --bg-card: #141414;
+  --text-primary: #fafafa;
+  --text-secondary: #a3a3a3;
+  --text-muted: #737373;
+  --border-color: #262626;
+  --accent-color: #3b82f6;
+  --accent-glow: rgba(59, 130, 246, 0.2);
+}
+
+/* Light Mode - Clean and readable */
+html.light {
+  --bg-primary: #fafafa;
+  --bg-secondary: #f5f5f5;
+  --bg-tertiary: #e5e5e5;
+  --bg-card: #ffffff;
+  --text-primary: #0a0a0a;
+  --text-secondary: #404040;
+  --text-muted: #737373;
+  --border-color: #d4d4d4;
+  --accent-color: #2563eb;
+  --accent-glow: rgba(37, 99, 235, 0.15);
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -9,13 +55,334 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #111827;
-  color: #f9fafb;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   overflow: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* ==============================================
+   DEFAULT THEME - Premium Blue Aesthetic
+   ============================================== */
+html:not(.dark):not(.light) body {
+  background: linear-gradient(135deg, #0a0f1a 0%, #0f172a 50%, #111827 100%);
+}
+
+html:not(.dark):not(.light) .bg-gray-900 {
+  background: linear-gradient(180deg, #0f172a 0%, #111827 100%) !important;
+}
+
+html:not(.dark):not(.light) .bg-gray-800 {
+  background-color: rgba(30, 58, 95, 0.4) !important;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+}
+
+html:not(.dark):not(.light) .bg-gray-800\/50 {
+  background-color: rgba(30, 58, 95, 0.25) !important;
+  backdrop-filter: blur(8px);
+}
+
+html:not(.dark):not(.light) .bg-gray-700 {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+}
+
+html:not(.dark):not(.light) .border-gray-700 {
+  border-color: rgba(59, 130, 246, 0.25) !important;
+}
+
+html:not(.dark):not(.light) .border-gray-600 {
+  border-color: rgba(59, 130, 246, 0.35) !important;
+}
+
+/* Premium blue glow effects for default theme */
+html:not(.dark):not(.light) .bg-blue-600,
+html:not(.dark):not(.light) .bg-blue-500 {
+  box-shadow: 0 0 25px rgba(59, 130, 246, 0.5), 0 0 50px rgba(59, 130, 246, 0.25);
+}
+
+html:not(.dark):not(.light) input:focus,
+html:not(.dark):not(.light) select:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+  border-color: rgba(59, 130, 246, 0.6) !important;
+}
+
+/* Default theme scrollbars - blue tinted */
+html:not(.dark):not(.light) ::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+html:not(.dark):not(.light) ::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.4);
+  border-radius: 4px;
+}
+
+html:not(.dark):not(.light) ::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.6);
+}
+
+/* ========================================
+   DARK MODE - Pure Dark Grays (NO BLUE)
+   ======================================== */
+html.dark body {
+  background-color: #0a0a0a;
+}
+
+html.dark .bg-gray-900 {
+  background-color: #0a0a0a !important;
+}
+
+html.dark .bg-gray-800 {
+  background-color: #141414 !important;
+}
+
+html.dark .bg-gray-800\/50 {
+  background-color: rgba(20, 20, 20, 0.7) !important;
+}
+
+html.dark .bg-gray-900\/80 {
+  background-color: rgba(10, 10, 10, 0.9) !important;
+}
+
+html.dark .bg-gray-700 {
+  background-color: #1f1f1f !important;
+}
+
+html.dark .from-gray-900 {
+  --tw-gradient-from: #0a0a0a !important;
+}
+
+html.dark .via-gray-800 {
+  --tw-gradient-stops: var(--tw-gradient-from), #141414, var(--tw-gradient-to) !important;
+}
+
+html.dark .to-gray-900 {
+  --tw-gradient-to: #0a0a0a !important;
+}
+
+html.dark .border-gray-700 {
+  border-color: #262626 !important;
+}
+
+html.dark .border-gray-600 {
+  border-color: #333333 !important;
+}
+
+/* Dark mode scrollbars */
+html.dark ::-webkit-scrollbar-track {
+  background: #141414;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: #333333;
+  border-radius: 4px;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #404040;
+}
+
+/* ========================================
+   LIGHT MODE - Clean & Readable
+   ======================================== */
+html.light body {
+  background-color: #fafafa;
+}
+
+html.light .bg-gray-900 {
+  background-color: #ffffff !important;
+}
+
+html.light .bg-gray-800 {
+  background-color: #ffffff !important;
+  border: 1px solid #e5e5e5 !important;
+}
+
+html.light .bg-gray-800\/50 {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid #e5e5e5;
+}
+
+html.light .bg-gray-900\/80 {
+  background-color: rgba(250, 250, 250, 0.98) !important;
+}
+
+html.light .bg-gray-700 {
+  background-color: #f5f5f5 !important;
+}
+
+html.light .bg-gray-600 {
+  background-color: #e5e5e5 !important;
+}
+
+html.light .from-gray-900 {
+  --tw-gradient-from: #fafafa !important;
+}
+
+html.light .via-gray-800 {
+  --tw-gradient-stops: var(--tw-gradient-from), #ffffff, var(--tw-gradient-to) !important;
+}
+
+html.light .to-gray-900 {
+  --tw-gradient-to: #fafafa !important;
+}
+
+/* Light mode shadows for depth */
+html.light .shadow-lg {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Light mode text colors - HIGH CONTRAST for readability */
+html.light .text-white {
+  color: #0a0a0a !important;
+}
+
+html.light .text-gray-100 {
+  color: #171717 !important;
+}
+
+html.light .text-gray-200 {
+  color: #262626 !important;
+}
+
+html.light .text-gray-300 {
+  color: #404040 !important;
+}
+
+html.light .text-gray-400 {
+  color: #525252 !important;
+}
+
+html.light .text-gray-500 {
+  color: #737373 !important;
+}
+
+/* Light mode - Blue text should be DARKER for readability */
+html.light .text-blue-200 {
+  color: #1e40af !important;
+}
+
+html.light .text-blue-300 {
+  color: #1d4ed8 !important;
+}
+
+html.light .text-blue-400 {
+  color: #2563eb !important;
+}
+
+/* Light mode tips section - darker blue for readability */
+html.light .bg-blue-900\/20 {
+  background-color: rgba(37, 99, 235, 0.08) !important;
+  border-color: rgba(37, 99, 235, 0.25) !important;
+}
+
+/* Light mode borders */
+html.light .border-gray-600 {
+  border-color: #d4d4d4 !important;
+}
+
+html.light .border-gray-700 {
+  border-color: #e5e5e5 !important;
+}
+
+html.light .border-gray-800 {
+  border-color: #f5f5f5 !important;
+}
+
+html.light .border-blue-500\/50 {
+  border-color: rgba(37, 99, 235, 0.35) !important;
+}
+
+/* Light mode placeholders */
+html.light .placeholder-gray-400::placeholder,
+html.light .placeholder-gray-500::placeholder {
+  color: #a3a3a3 !important;
+}
+
+/* Light mode inputs */
+html.light input,
+html.light select,
+html.light textarea {
+  background-color: #ffffff !important;
+  border-color: #d4d4d4 !important;
+  color: #0a0a0a !important;
+}
+
+html.light input:focus,
+html.light select:focus,
+html.light textarea:focus {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* Light mode scrollbars */
+html.light ::-webkit-scrollbar-track {
+  background: #f5f5f5;
+}
+
+html.light ::-webkit-scrollbar-thumb {
+  background: #c4c4c4;
+  border-radius: 4px;
+}
+
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: #a3a3a3;
+}
+
+/* Light mode sidebar */
+html.light .sidebar-bg {
+  background-color: #ffffff !important;
+  border-right: 1px solid #e5e5e5;
+}
+
+/* Light mode hover states */
+html.light .hover\:bg-gray-700:hover {
+  background-color: #f5f5f5 !important;
+}
+
+html.light .hover\:bg-gray-800:hover {
+  background-color: #fafafa !important;
+}
+
+html.light .hover\:bg-white\/10:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Light mode cards */
+html.light .bg-green-900\/20 {
+  background-color: rgba(34, 197, 94, 0.1) !important;
+}
+
+html.light .bg-red-900\/20 {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+html.light .bg-amber-500\/10 {
+  background-color: rgba(245, 158, 11, 0.1) !important;
+}
+
+/* ========================================
+   GLOBAL STYLES
+   ======================================== */
 * {
   box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #404040;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #525252;
 }
 
 /* Custom Slider Styles */
@@ -44,24 +411,11 @@ body {
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
 }
 
-::-webkit-scrollbar {
-  width: 8px;
-}
+/* ========================================
+   ANIMATIONS
+   ======================================== */
 
-::-webkit-scrollbar-track {
-  background: #374151;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #6b7280;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
-}
-
-/* ✅ Animación para warning */
+/* Warning slide down */
 @keyframes slide-down {
   from {
     transform: translateX(-50%) translateY(-120%);
@@ -75,4 +429,64 @@ body {
 
 .animate-slide-down {
   animation: slide-down 0.3s ease-out;
+}
+
+/* Electron window drag */
+.app-drag {
+  -webkit-app-region: drag;
+}
+
+.no-drag {
+  -webkit-app-region: no-drag;
+}
+
+/* Gradient text animation */
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.animate-gradient {
+  background-size: 200% auto;
+  animation: gradient-shift 3s ease infinite;
+}
+
+/* Pulse glow effect */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
+  50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Smooth appearance */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.4s ease-out;
+}
+
+/* Premium glow for default theme buttons */
+@keyframes premium-glow {
+  0%, 100% { 
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.4), 0 0 30px rgba(59, 130, 246, 0.2);
+  }
+  50% { 
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.6), 0 0 50px rgba(59, 130, 246, 0.3);
+  }
+}
+
+html:not(.dark):not(.light) .animate-premium-glow {
+  animation: premium-glow 2s ease-in-out infinite;
 }

@@ -1,6 +1,7 @@
 export { DownloadQueue } from './DownloadQueue';
 export { PlaylistPreview } from './PlaylistPreview';
 export { VideoPreview } from './VideoPreview';
+export { VideoPlayer } from './VideoPlayer';
 export { SubtitleSelector } from './SubtitleSelector';
 
 export interface DownloadJob {

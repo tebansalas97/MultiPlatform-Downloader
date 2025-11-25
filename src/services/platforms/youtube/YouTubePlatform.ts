@@ -52,7 +52,8 @@ export class YouTubePlatform extends BasePlatform {
     }
 
     try {
-      const urlObj = new URL(url);
+      // Validar que sea una URL válida
+      new URL(url);
 
       // Detectar tipo de contenido
       if (this.isPlaylistUrl(url)) {
@@ -178,12 +179,15 @@ export class YouTubePlatform extends BasePlatform {
                 filesize: f.filesize
               })) || [],
               platform: 'youtube',
+              // Campos a nivel raíz
+              views: videoData.view_count,
+              likes: videoData.like_count,
+              uploadDate: videoData.upload_date,
+              description: videoData.description?.substring(0, 500),
               platformSpecific: {
-                views: videoData.view_count,
-                likes: videoData.like_count,
-                uploadDate: videoData.upload_date,
                 channelId: videoData.channel_id,
-                isLive: videoData.is_live
+                isLive: videoData.is_live,
+                isShort: url.includes('/shorts/')
               }
             };
 

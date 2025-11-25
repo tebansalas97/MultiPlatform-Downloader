@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { 
   PlayIcon, 
-  PauseIcon, 
   XMarkIcon, 
   ClockIcon,
   CheckCircleIcon,
@@ -11,6 +10,7 @@ import {
 import { useDownloadStore } from '../../stores/downloadStore';
 import { downloadService } from '../../services/DownloadService';
 import { DownloadJob } from '../../types';
+import { ProxyImage } from '../ui';
 
 interface DownloadQueueProps {
   isVisible: boolean;
@@ -28,10 +28,6 @@ export function DownloadQueue({ isVisible, onToggle }: DownloadQueueProps) {
       downloadService.processQueue();
     }
   }, [jobs]);
-
-  const handleStartDownload = (jobId: string) => {
-    downloadService.startDownload(jobId);
-  };
 
   const handleCancelDownload = (jobId: string) => {
     downloadService.cancelDownload(jobId);
@@ -78,7 +74,9 @@ export function DownloadQueue({ isVisible, onToggle }: DownloadQueueProps) {
     }
   };
 
-  const formatFileSize = (sizeStr: string | undefined) => {
+  // Función de utilidad para formateo de tamaño (disponible para uso futuro)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _formatFileSize = (sizeStr: string | undefined) => {
     return sizeStr || 'Unknown size';
   };
 
@@ -153,21 +151,14 @@ export function DownloadQueue({ isVisible, onToggle }: DownloadQueueProps) {
               >
                 <div className="flex items-start space-x-3">
                   {/* Thumbnail */}
-                  <div className="flex-shrink-0 w-12 h-9 bg-gray-700 rounded overflow-hidden">
-                    {job.thumbnail ? (
-                      <img
-                        src={job.thumbnail}
-                        alt={job.title}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <PlayIcon className="w-5 h-5 text-gray-500" />
-                      </div>
-                    )}
+                  <div className="flex-shrink-0 w-12 h-9 rounded overflow-hidden">
+                    <ProxyImage
+                      src={job.thumbnail}
+                      alt={job.title}
+                      platform={job.platform}
+                      className="w-full h-full object-cover"
+                      fallbackIcon={<PlayIcon className="w-5 h-5 text-gray-500" />}
+                    />
                   </div>
 
                   {/* Info */}

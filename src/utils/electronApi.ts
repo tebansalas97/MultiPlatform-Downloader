@@ -20,6 +20,7 @@ interface ElectronApi {
   checkYtDlp: () => Promise<boolean>;
   getSystemInfo: () => any;
   getFs: () => any;
+  getPath: () => any;
   isElectron: boolean;
 }
 
@@ -291,8 +292,55 @@ class ElectronApiWrapper implements ElectronApi {
       readFileSync: () => Buffer.from(''),
       writeFileSync: () => {},
       unlinkSync: () => {},
-      renameSync: () => {}
+      renameSync: () => {},
+      statSync: () => ({ mtimeMs: 0 })
     };
+  }
+
+  /**
+   * Obtener módulo path de Node.js
+   */
+  getPath(): any {
+    if (this.isElectron) {
+      try {
+        const pathModule = window.require('path');
+        return pathModule;
+      } catch (e) {
+        console.warn('⚠️ Failed to load path module:', e);
+      }
+    }
+
+    // Mock básico para desarrollo web
+    return {
+      join: (...parts: string[]) => parts.join('/'),
+      basename: (p: string) => p.split(/[/\\]/).pop() || '',
+      dirname: (p: string) => p.split(/[/\\]/).slice(0, -1).join('/'),
+      extname: (p: string) => {
+        const base = p.split(/[/\\]/).pop() || '';
+        const idx = base.lastIndexOf('.');
+        return idx > 0 ? base.substring(idx) : '';
+      }
+    };
+  }
+
+  /**
+   * Fetch imagen a través de Electron para evitar CORS
+   * Devuelve una data URL (base64) de la imagen
+   */
+  async fetchImage(imageUrl: string): Promise<string | null> {
+    if (!this.isElectron) {
+      console.log('🌐 Web mode: fetchImage returning original URL');
+      return imageUrl; // En web mode, devolver la URL original
+    }
+
+    try {
+      const { ipcRenderer } = window.require('electron');
+      const dataUrl = await ipcRenderer.invoke('fetch-image', imageUrl);
+      return dataUrl;
+    } catch (error) {
+      console.error('❌ Error fetching image via Electron:', error);
+      return null;
+    }
   }
 
   async ensureYtDlpUpdated(): Promise<boolean> {
@@ -368,6 +416,42 @@ class ElectronApiWrapper implements ElectronApi {
     } catch (error) {
       console.error('❌ yt-dlp check failed:', error);
       return false;
+    }
+  }
+
+  /**
+   * Obtener URL de streaming via IPC de Electron
+   */
+  async getStreamUrl(videoUrl: string): Promise<{ success: boolean; videoUrl?: string; audioUrl?: string; error?: string }> {
+    if (!this.isElectron) {
+      return { success: false, error: 'Not running in Electron' };
+    }
+
+    try {
+      const { ipcRenderer } = window.require('electron');
+      const result = await ipcRenderer.invoke('get-stream-url', videoUrl);
+      return result;
+    } catch (error) {
+      console.error('Error getting stream URL:', error);
+      return { success: false, error: String(error) };
+    }
+  }
+
+  /**
+   * Proxy de video stream para evitar CORS
+   */
+  async proxyVideoStream(streamUrl: string): Promise<{ success: boolean; dataUrl?: string; size?: number; error?: string }> {
+    if (!this.isElectron) {
+      return { success: false, error: 'Not running in Electron' };
+    }
+
+    try {
+      const { ipcRenderer } = window.require('electron');
+      const result = await ipcRenderer.invoke('proxy-video-stream', streamUrl);
+      return result;
+    } catch (error) {
+      console.error('Error proxying video stream:', error);
+      return { success: false, error: String(error) };
     }
   }
 }

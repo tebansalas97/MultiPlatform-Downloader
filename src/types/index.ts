@@ -13,6 +13,7 @@ export interface DownloadJob {
   createdAt: Date;
   completedAt?: Date;
   error?: string;
+  platform?: string;
   // Nuevos campos para recorte
   startTime?: number;
   endTime?: number;
@@ -55,6 +56,12 @@ export interface VideoInfo {
   thumbnail: string;
   uploader: string;
   fileSize?: string;
+  // Campos adicionales para estadísticas
+  views?: number;
+  likes?: number;
+  platform?: string;
+  description?: string;
+  uploadDate?: string;
   formats: Array<{
     format_id: string;
     ext: string;

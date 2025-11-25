@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { DownloadJob, AppSettings } from '../types';
+import { generateJobId } from '../utils/idGenerator';
 
 interface DownloadStore {
   // Estado actual
@@ -57,7 +58,7 @@ export const useDownloadStore = create<DownloadStore>()(
       addJob: (jobData) => {
         const newJob: DownloadJob = {
           ...jobData,
-          id: Math.random().toString(36).substr(2, 9),
+          id: generateJobId(),
           status: 'pending',
           progress: 0,
           createdAt: new Date()

@@ -123,12 +123,13 @@ export class TikTokPlatform extends BasePlatform {
                 quality: format.height ? `${format.height}p` : 'audio',
                 filesize: format.filesize
               })) || [],
+              // Campos a nivel raíz
+              views: videoData.view_count || 0,
+              likes: videoData.like_count || 0,
+              uploadDate: videoData.upload_date || '',
+              description: videoData.description?.substring(0, 500),
               platformSpecific: {
                 videoId: this.extractVideoId(url) || videoData.id,
-                description: videoData.description || '',
-                views: videoData.view_count || 0,
-                likes: videoData.like_count || 0,
-                uploadDate: videoData.upload_date || '',
                 url: url
               }
             };
@@ -191,20 +192,16 @@ export class TikTokPlatform extends BasePlatform {
 
     const args: string[] = [];
 
-    // FFmpeg location
+    // FFmpeg location (siempre necesario para TikTok)
     if (ffmpegPath) {
       args.push('--ffmpeg-location', ffmpegPath);
     }
 
-    // Tipo de descarga
-    if (job.type === 'video-audio') {
-      // Video con audio (mejor calidad)
-      // Descargar sin conversión, el post-procesamiento se hará después
+    // Tipo de descarga - TikTok generalmente tiene streams combinados
+    if (job.type === 'video-audio' || job.type === 'video') {
+      // TikTok: Usar formato simple que funcione siempre
+      // No usar filtros complejos que pueden fallar
       args.push('-f', 'best[ext=mp4]/best');
-      args.push('--merge-output-format', 'mp4');
-    } else if (job.type === 'video') {
-      // Solo video (sin audio)
-      args.push('-f', 'bestvideo[ext=mp4]/bestvideo');
       args.push('--merge-output-format', 'mp4');
     } else if (job.type === 'audio') {
       // Solo audio
@@ -226,6 +223,12 @@ export class TikTokPlatform extends BasePlatform {
     // Output template
     const outputTemplate = '%(title).200s.%(ext)s';
     args.push('-o', `${job.folder}/${outputTemplate}`);
+
+    // Soporte para clips (recorte de video)
+    if (job.startTime !== undefined && job.endTime !== undefined && ffmpegPath) {
+      args.push('--download-sections', `*${job.startTime}-${job.endTime}`);
+      this.log('info', 'Clip mode enabled', { startTime: job.startTime, endTime: job.endTime });
+    }
 
     // Opciones adicionales de TikTok
     args.push('--no-warnings');

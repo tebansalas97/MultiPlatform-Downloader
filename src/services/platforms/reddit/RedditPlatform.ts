@@ -121,13 +121,14 @@ export class RedditPlatform extends BasePlatform {
                 quality: format.height ? `${format.height}p` : 'audio',
                 filesize: format.filesize
               })) || [],
+              // Campos a nivel raíz
+              views: videoData.view_count || 0,
+              likes: videoData.like_count || 0,
+              uploadDate: videoData.upload_date || '',
+              description: videoData.description?.substring(0, 500),
               platformSpecific: {
                 postId: this.extractVideoId(url) || videoData.id,
                 subreddit: videoData.channel || 'Unknown',
-                description: videoData.description || '',
-                views: videoData.view_count || 0,
-                likes: videoData.like_count || 0,
-                uploadDate: videoData.upload_date || '',
                 url: url
               }
             };
@@ -228,6 +229,12 @@ export class RedditPlatform extends BasePlatform {
     // Output template
     const outputTemplate = '%(title).200s.%(ext)s';
     args.push('-o', `${job.folder}/${outputTemplate}`);
+
+    // Soporte para clips (recorte de video)
+    if (job.startTime !== undefined && job.endTime !== undefined && ffmpegPath) {
+      args.push('--download-sections', `*${job.startTime}-${job.endTime}`);
+      this.log('info', 'Clip mode enabled', { startTime: job.startTime, endTime: job.endTime });
+    }
 
     // Opciones adicionales de Reddit
     args.push('--no-warnings');

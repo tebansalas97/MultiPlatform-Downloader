@@ -5,10 +5,14 @@ import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { KeyboardShortcutsHelp } from './components/ui/KeyboardShortcutsHelp';
 import { QuickSettings } from './components/ui/QuickSettings';
 import { checkEnvironment, electronApi } from './utils/electronApi';
-import { isWebMode, showWebModeWarning } from './config/webMode'; // ✅ Importar
+import { isWebMode, showWebModeWarning } from './config/webMode';
+import { useTheme } from './hooks/useTheme';
 import './App.css';
 
 function App() {
+  // Aplicar tema
+  useTheme();
+  
   useEffect(() => {
     console.log('🚀 App starting with enhanced initialization...');
     

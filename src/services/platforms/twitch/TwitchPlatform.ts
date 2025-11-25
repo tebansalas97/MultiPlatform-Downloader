@@ -132,12 +132,14 @@ export class TwitchPlatform extends BasePlatform {
                 quality: format.height ? `${format.height}p${format.fps || ''}` : 'audio',
                 filesize: format.filesize
               })) || [],
+              // Campos a nivel raíz
+              views: videoData.view_count || 0,
+              likes: 0, // Twitch no tiene likes
+              uploadDate: videoData.upload_date || videoData.timestamp,
+              description: videoData.description?.substring(0, 500),
               platformSpecific: {
                 videoId: this.extractVideoId(url) || videoData.id,
                 channel: videoData.channel || videoData.uploader,
-                description: videoData.description || '',
-                views: videoData.view_count || 0,
-                uploadDate: videoData.upload_date || videoData.timestamp,
                 isLive: this.isLiveStream(url),
                 url: url
               }
@@ -239,6 +241,12 @@ export class TwitchPlatform extends BasePlatform {
     // Output template
     const outputTemplate = '%(title).200s.%(ext)s';
     args.push('-o', `${job.folder}/${outputTemplate}`);
+
+    // Soporte para clips (recorte de video)
+    if (job.startTime !== undefined && job.endTime !== undefined && ffmpegPath) {
+      args.push('--download-sections', `*${job.startTime}-${job.endTime}`);
+      this.log('info', 'Clip mode enabled', { startTime: job.startTime, endTime: job.endTime });
+    }
 
     // Opciones adicionales de Twitch
     args.push('--no-warnings');

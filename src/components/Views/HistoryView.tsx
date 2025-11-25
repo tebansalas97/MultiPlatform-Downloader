@@ -11,6 +11,7 @@ import {
 import { useDownloadStore } from '../../stores/downloadStore';
 import { downloadService } from '../../services/DownloadService';
 import { DownloadJob } from '../../types';
+import { ProxyImage } from '../ui';
 
 const { shell } = window.require ? window.require('electron') : { shell: null };
 
@@ -40,6 +41,19 @@ export function HistoryView() {
       }
     });
 
+  // Detectar plataforma desde la URL
+  const detectPlatform = (url: string): string | undefined => {
+    if (!url) return undefined;
+    if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
+    if (url.includes('tiktok.com')) return 'tiktok';
+    if (url.includes('twitter.com') || url.includes('x.com')) return 'twitter';
+    if (url.includes('instagram.com')) return 'instagram';
+    if (url.includes('reddit.com')) return 'reddit';
+    if (url.includes('twitch.tv')) return 'twitch';
+    if (url.includes('facebook.com') || url.includes('fb.watch')) return 'facebook';
+    return undefined;
+  };
+
   const handleOpenFolder = async (folderPath: string) => {
     if (shell) {
       await shell.openPath(folderPath);
@@ -58,7 +72,8 @@ export function HistoryView() {
       folder: item.folder,
       thumbnail: item.thumbnail,
       duration: item.duration,
-      fileSize: item.fileSize
+      fileSize: item.fileSize,
+      platform: item.platform || detectPlatform(item.url)
     });
 
     // Auto-iniciar descarga
@@ -211,21 +226,14 @@ export function HistoryView() {
               >
                 <div className="flex items-start space-x-4">
                   {/* Thumbnail */}
-                  <div className="flex-shrink-0 w-20 h-15 bg-gray-700 rounded overflow-hidden">
-                    {item.thumbnail ? (
-                      <img 
-                        src={item.thumbnail} 
-                        alt={item.title}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <PlayIcon className="w-8 h-8 text-gray-500" />
-                      </div>
-                    )}
+                  <div className="flex-shrink-0 w-20 h-15 rounded overflow-hidden">
+                    <ProxyImage
+                      src={item.thumbnail}
+                      alt={item.title}
+                      platform={item.platform || detectPlatform(item.url)}
+                      className="w-full h-full object-cover"
+                      fallbackIcon={<PlayIcon className="w-8 h-8 text-gray-500" />}
+                    />
                   </div>
 
                   {/* Info */}

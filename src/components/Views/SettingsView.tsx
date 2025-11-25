@@ -22,8 +22,18 @@ export function SettingsView() {
   const { settings, updateSettings } = useDownloadStore();
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [savedMessage, setSavedMessage] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    setIsSaving(true);
+    
+    // Simular guardado (el store ya persiste automáticamente, pero esto da feedback)
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Forzar persistencia
+    useDownloadStore.persist.rehydrate();
+    
+    setIsSaving(false);
     setSavedMessage(true);
     setTimeout(() => setSavedMessage(false), 3000);
   };
@@ -68,8 +78,8 @@ export function SettingsView() {
   ];
 
   return (
-    <div className="flex-1 p-6">
-      <div className="max-w-4xl mx-auto">
+    <div className="flex-1 p-6 overflow-y-auto">
+      <div className="max-w-4xl mx-auto pb-8">
         {/* Header */}
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-white mb-2">Settings</h2>
@@ -366,10 +376,24 @@ export function SettingsView() {
 
             <button
               onClick={handleSave}
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center space-x-2"
+              disabled={isSaving}
+              className={`px-6 py-2 rounded-lg font-medium transition-all flex items-center space-x-2 ${
+                isSaving 
+                  ? 'bg-blue-700 text-white cursor-wait' 
+                  : 'bg-blue-600 hover:bg-blue-700 text-white hover:scale-105'
+              }`}
             >
-              <CheckIcon className="w-4 h-4" />
-              <span>Save Settings</span>
+              {isSaving ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                  <span>Saving...</span>
+                </>
+              ) : (
+                <>
+                  <CheckIcon className="w-4 h-4" />
+                  <span>Save Settings</span>
+                </>
+              )}
             </button>
           </div>
         </div>

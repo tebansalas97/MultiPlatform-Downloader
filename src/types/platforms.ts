@@ -2,7 +2,7 @@
  * Tipos y interfaces para el sistema de plataformas multi-sitio
  */
 
-import { DownloadJob, VideoInfo, PlaylistInfo } from './index';
+import { VideoInfo, PlaylistInfo } from './index';
 
 /**
  * Plataformas soportadas
@@ -101,12 +101,18 @@ export interface PlatformCapabilities {
  */
 export interface PlatformVideoInfo extends VideoInfo {
   platform: PlatformType;
+  // Campos de estadísticas directamente accesibles
+  views?: number;
+  likes?: number;
+  uploadDate?: string;
+  description?: string;
+  // Campos específicos de plataforma adicionales
   platformSpecific?: {
-    views?: number;
-    likes?: number;
-    uploadDate?: string;
     channelId?: string;
     isLive?: boolean;
+    isShort?: boolean;
+    isReel?: boolean;
+    hashtags?: string[];
     [key: string]: any;
   };
 }

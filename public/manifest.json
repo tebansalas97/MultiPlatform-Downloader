@@ -1,11 +1,18 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "MP Downloader",
+  "name": "MultiPlatform Downloader Pro",
+  "description": "Download videos from YouTube, TikTok, Twitter, Instagram, Reddit, Twitch, and Facebook",
   "icons": [
     {
       "src": "favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
+    },
+    {
+      "src": "Logo.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
     },
     {
       "src": "logo192.png",
@@ -20,6 +27,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#111827",
+  "background_color": "#111827"
 }

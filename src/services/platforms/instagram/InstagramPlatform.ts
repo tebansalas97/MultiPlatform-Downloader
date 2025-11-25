@@ -26,10 +26,11 @@ export class InstagramPlatform extends BasePlatform {
 
   readonly urlPatterns: RegExp[] = [
     /(?:https?:\/\/)?(?:www\.)?instagram\.com\/p\/[\w-]+/i,
-    /(?:https?:\/\/)?(?:www\.)?instagram\.com\/reel\/[\w-]+/i,
+    /(?:https?:\/\/)?(?:www\.)?instagram\.com\/reels?\/[\w-]+/i,  // Soporta /reel/ y /reels/
     /(?:https?:\/\/)?(?:www\.)?instagram\.com\/tv\/[\w-]+/i,
     /(?:https?:\/\/)?(?:www\.)?instagram\.com\/stories\/[\w.-]+\/\d+/i,
-    /(?:https?:\/\/)?(?:www\.)?instagr\.am\/p\/[\w-]+/i
+    /(?:https?:\/\/)?(?:www\.)?instagr\.am\/p\/[\w-]+/i,
+    /(?:https?:\/\/)?(?:www\.)?instagr\.am\/reels?\/[\w-]+/i  // Short URLs con reels
   ];
 
   readonly capabilities: PlatformCapabilities = {
@@ -61,7 +62,7 @@ export class InstagramPlatform extends BasePlatform {
 
     // Detectar tipo de contenido
     let contentType: 'video' | 'unknown' = 'video';
-    if (url.includes('/reel/')) {
+    if (url.includes('/reel/') || url.includes('/reels/')) {
       contentType = 'video';
     } else if (url.includes('/tv/')) {
       contentType = 'video';
@@ -134,15 +135,16 @@ export class InstagramPlatform extends BasePlatform {
                 quality: format.height ? `${format.height}p` : 'audio',
                 filesize: format.filesize
               })) || [],
+              // Campos a nivel raíz
+              views: videoData.view_count || 0,
+              likes: videoData.like_count || 0,
+              uploadDate: videoData.upload_date || videoData.timestamp,
+              description: videoData.description?.substring(0, 500),
               platformSpecific: {
                 postId: this.extractVideoId(url) || videoData.id,
                 username: videoData.uploader || 'Unknown',
-                description: videoData.description || '',
-                views: videoData.view_count || 0,
-                likes: videoData.like_count || 0,
                 comments: videoData.comment_count || 0,
-                uploadDate: videoData.upload_date || videoData.timestamp,
-                isReel: url.includes('/reel/'),
+                isReel: url.includes('/reel/') || url.includes('/reels/'),
                 isIGTV: url.includes('/tv/'),
                 isStory: url.includes('/stories/'),
                 url: url
@@ -253,6 +255,12 @@ export class InstagramPlatform extends BasePlatform {
     // Output template
     const outputTemplate = '%(title).200s.%(ext)s';
     args.push('-o', `${job.folder}/${outputTemplate}`);
+
+    // Soporte para clips (recorte de video)
+    if (job.startTime !== undefined && job.endTime !== undefined && ffmpegPath) {
+      args.push('--download-sections', `*${job.startTime}-${job.endTime}`);
+      this.log('info', 'Clip mode enabled', { startTime: job.startTime, endTime: job.endTime });
+    }
 
     // Opciones adicionales de Instagram
     args.push('--no-warnings');

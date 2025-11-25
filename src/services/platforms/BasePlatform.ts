@@ -3,7 +3,7 @@
  * Define la interfaz común que todas las plataformas deben implementar
  */
 
-import { DownloadJob, VideoInfo, PlaylistInfo } from '../../types';
+import { DownloadJob } from '../../types';
 import {
   PlatformType,
   PlatformConfig,

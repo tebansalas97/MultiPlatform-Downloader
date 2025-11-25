@@ -4,17 +4,14 @@ import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { downloadService } from '../../services/DownloadService';
 import { playlistService } from '../../services/PlaylistService';
 import { electronApi } from '../../utils/electronApi';
-import { DropZone } from '../ui/DropZone';
+import { DropZone, PlatformIcon } from '../ui';
 import { VideoPreview, PlaylistPreview, SubtitleSelector } from '../Download';
 import { FolderSelector } from '../ui/FolderSelector';
-import { VideoInfo, PlaylistInfo } from '../../types';
 import {
   LinkIcon,
   PlusIcon,
   VideoCameraIcon,
-  DocumentTextIcon,
-  FolderIcon,
-  ClockIcon
+  DocumentTextIcon
 } from '@heroicons/react/24/outline';
 
 export function DownloadView() {
@@ -64,7 +61,8 @@ export function DownloadView() {
       window.removeEventListener('preview-video', handlePreviewVideo);
       window.removeEventListener('capture-video-info', handleCaptureVideoInfo);
     };
-  }, [url]); // ✅ Solo depender de url
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [url]);
 
   const handleUrlDrop = async (urls: string[]) => {
     if (urls.length > 0) {
@@ -105,6 +103,19 @@ export function DownloadView() {
     }
   };
 
+  // Detectar plataforma para mostrar indicador
+  const detectPlatform = (inputUrl: string): string | null => {
+    if (!inputUrl) return null;
+    if (inputUrl.includes('youtube.com') || inputUrl.includes('youtu.be')) return 'youtube';
+    if (inputUrl.includes('tiktok.com')) return 'tiktok';
+    if (inputUrl.includes('twitter.com') || inputUrl.includes('x.com')) return 'twitter';
+    if (inputUrl.includes('instagram.com')) return 'instagram';
+    if (inputUrl.includes('reddit.com')) return 'reddit';
+    if (inputUrl.includes('twitch.tv')) return 'twitch';
+    if (inputUrl.includes('facebook.com') || inputUrl.includes('fb.watch')) return 'facebook';
+    return null;
+  };
+
   const handleAddToQueue = async (inputUrl?: string) => {
     const targetUrl = inputUrl || url;
     
@@ -129,6 +140,7 @@ export function DownloadView() {
         setShowPlaylistPreview(true);
       } else {
         // Video individual
+        const platform = detectPlatform(targetUrl);
         const videoInfo = await downloadService.getVideoInfo(targetUrl);
         setCurrentVideoInfo(videoInfo);
         
@@ -141,7 +153,8 @@ export function DownloadView() {
           folder: currentFolder,
           thumbnail: videoInfo.thumbnail,
           duration: videoInfo.duration,
-          fileSize: videoInfo.fileSize
+          fileSize: videoInfo.fileSize,
+          platform: platform || undefined
         });
 
         // Limpiar URL después de agregar
@@ -156,6 +169,7 @@ export function DownloadView() {
   };
 
   const handleVideoDownload = (videoUrl: string, startTime?: number, endTime?: number) => {
+    const platform = detectPlatform(videoUrl);
     addJob({
       url: videoUrl,
       title: currentVideoInfo?.title || 'Video Download',
@@ -165,6 +179,7 @@ export function DownloadView() {
       thumbnail: currentVideoInfo?.thumbnail,
       duration: currentVideoInfo?.duration,
       fileSize: currentVideoInfo?.fileSize,
+      platform: platform || undefined,
       startTime,
       endTime,
       isClip: startTime !== undefined && endTime !== undefined
@@ -186,6 +201,7 @@ export function DownloadView() {
     // Obtener info de cada video y agregarlo a la cola
     for (const videoUrl of selectedUrls) {
       try {
+        const platform = detectPlatform(videoUrl);
         // Buscar la info del video en currentPlaylistInfo si está disponible
         const videoId = videoUrl.split('v=')[1]?.split('&')[0];
         const playlistVideoInfo = currentPlaylistInfo?.videos.find((v: any) => v.id === videoId);
@@ -200,7 +216,8 @@ export function DownloadView() {
             folder: currentFolder,
             thumbnail: playlistVideoInfo.thumbnail,
             duration: playlistVideoInfo.duration,
-            fileSize: 'Unknown'
+            fileSize: 'Unknown',
+            platform: platform || undefined
           });
         } else {
           // Fallback: obtener info individual (más lento)
@@ -213,11 +230,13 @@ export function DownloadView() {
             folder: currentFolder,
             thumbnail: videoInfo.thumbnail,
             duration: videoInfo.duration,
-            fileSize: videoInfo.fileSize
+            fileSize: videoInfo.fileSize,
+            platform: platform || undefined
           });
         }
       } catch (error) {
         console.error(`Failed to get info for ${videoUrl}:`, error);
+        const platform = detectPlatform(videoUrl);
         // Agregar con info mínima si falla
         addJob({
           url: videoUrl,
@@ -227,7 +246,8 @@ export function DownloadView() {
           folder: currentFolder,
           thumbnail: '',
           duration: 'Unknown',
-          fileSize: 'Unknown'
+          fileSize: 'Unknown',
+          platform: platform || undefined
         });
       }
     }
@@ -244,27 +264,80 @@ export function DownloadView() {
   const clearError = () => setError(null);
   const currentFolder = customFolder || settings.defaultFolder;
 
+  const detectedPlatform = detectPlatform(url);
+
+  const platformColors: Record<string, string> = {
+    youtube: 'border-red-500 ring-red-500/20',
+    tiktok: 'border-pink-500 ring-pink-500/20',
+    twitter: 'border-blue-400 ring-blue-400/20',
+    instagram: 'border-purple-500 ring-purple-500/20',
+    reddit: 'border-orange-500 ring-orange-500/20',
+    twitch: 'border-violet-500 ring-violet-500/20',
+    facebook: 'border-blue-600 ring-blue-600/20',
+  };
+
+  // Colores de gradiente para el botón Add to Queue según plataforma
+  const platformButtonGradients: Record<string, string> = {
+    youtube: 'from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 shadow-red-500/25 hover:shadow-red-500/40',
+    tiktok: 'from-black to-gray-900 hover:from-gray-900 hover:to-black shadow-white/10 hover:shadow-white/20 ring-1 ring-white/20',
+    twitter: 'from-gray-800 to-black hover:from-gray-700 hover:to-gray-900 shadow-gray-500/25 hover:shadow-gray-500/40',
+    instagram: 'from-pink-600 via-purple-600 to-orange-500 hover:from-pink-500 hover:via-purple-500 hover:to-orange-400 shadow-pink-500/25 hover:shadow-pink-500/40',
+    reddit: 'from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 shadow-orange-500/25 hover:shadow-orange-500/40',
+    twitch: 'from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 shadow-purple-500/25 hover:shadow-purple-500/40',
+    facebook: 'from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 shadow-blue-500/25 hover:shadow-blue-500/40',
+  };
+  
+  const defaultButtonGradient = 'from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 shadow-blue-500/25 hover:shadow-blue-500/40';
+
   return (
     <DropZone onDrop={handleUrlDrop} className="flex-1">
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-6 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
         <div className="max-w-4xl mx-auto">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-white mb-2">Download Videos</h2>
-            <p className="text-gray-400">
-              Paste YouTube URLs or drag them from your browser to get started
-            </p>
+          {/* Header mejorado */}
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              <h2 className="text-2xl font-bold text-white">
+                Download Videos
+              </h2>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-gray-400 text-sm">Supported platforms:</span>
+              <div className="flex items-center gap-2">
+                <PlatformIcon platform="youtube" size="sm" />
+                <PlatformIcon platform="tiktok" size="sm" />
+                <PlatformIcon platform="twitter" size="sm" />
+                <PlatformIcon platform="instagram" size="sm" />
+                <PlatformIcon platform="reddit" size="sm" />
+                <PlatformIcon platform="twitch" size="sm" />
+                <PlatformIcon platform="facebook" size="sm" />
+              </div>
+            </div>
           </div>
 
-          {/* URL Input */}
-          <div className="bg-gray-800 rounded-lg p-6 mb-6 border border-gray-700 border-dashed hover:border-gray-600 transition-colors">
+          {/* URL Input con diseño mejorado */}
+          <div className={`bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 mb-6 border-2 border-dashed transition-all duration-300 ${
+            detectedPlatform 
+              ? `${platformColors[detectedPlatform]} ring-4` 
+              : 'border-gray-600 hover:border-gray-500'
+          }`}>
             <div className="space-y-4">
+              {/* Platform indicator */}
+              {detectedPlatform && (
+                <div className="flex items-center gap-2 text-sm">
+                  <PlatformIcon platform={detectedPlatform} size="md" />
+                  <span className="text-gray-300 capitalize font-medium">
+                    {detectedPlatform} Video Detected
+                  </span>
+                </div>
+              )}
+
               {/* Error Message */}
               {error && (
-                <div className="bg-red-900/20 border border-red-500/50 rounded-lg p-3 flex items-center justify-between">
+                <div className="bg-red-900/30 border border-red-500/50 rounded-xl p-4 flex items-center justify-between backdrop-blur-sm">
                   <span className="text-red-300 text-sm">{error}</span>
                   <button
                     onClick={clearError}
-                    className="text-red-400 hover:text-red-300"
+                    className="text-red-400 hover:text-red-300 transition-colors"
                   >
                     ×
                   </button>
@@ -273,17 +346,19 @@ export function DownloadView() {
 
               {/* URL Field */}
               <div className="flex space-x-4">
-                <div className="flex-1 relative">
-                  <LinkIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <div className="flex-1 relative group">
+                  <LinkIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-400 transition-colors" />
                   <input
                     type="text"
                     value={url}
                     onChange={(e) => setUrl(e.target.value)}
-                    placeholder="Paste YouTube URL here or drag from browser..."
-                    className={`w-full bg-gray-900 border rounded-lg pl-10 pr-4 py-3 text-white placeholder-gray-400 focus:outline-none transition-colors ${
+                    placeholder="Paste video URL here (YouTube, TikTok, Instagram, Twitter...)"
+                    className={`w-full bg-gray-900/80 border-2 rounded-xl pl-12 pr-4 py-4 text-white placeholder-gray-500 focus:outline-none transition-all duration-300 ${
                       error 
-                        ? 'border-red-500 focus:border-red-400' 
-                        : 'border-gray-600 focus:border-blue-500'
+                        ? 'border-red-500 focus:border-red-400 focus:ring-4 focus:ring-red-500/20' 
+                        : detectedPlatform
+                          ? `${platformColors[detectedPlatform]?.split(' ')[0]} focus:ring-4`
+                          : 'border-gray-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20'
                     }`}
                     onKeyPress={handleKeyPress}
                     disabled={isLoading}
@@ -292,16 +367,16 @@ export function DownloadView() {
                 <button 
                   onClick={() => handleAddToQueue()}
                   disabled={isLoading || !url.trim() || !currentFolder}
-                  className={`px-6 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2 ${
+                  className={`px-8 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center space-x-2 shadow-lg ${
                     isLoading || !url.trim() || !currentFolder
-                      ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                      : 'bg-blue-600 hover:bg-blue-700 text-white'
+                      ? 'bg-gray-700 text-gray-400 cursor-not-allowed shadow-none'
+                      : `bg-gradient-to-r ${detectedPlatform ? platformButtonGradients[detectedPlatform] : defaultButtonGradient} text-white hover:scale-105`
                   }`}
                 >
                   {isLoading ? (
                     <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                      <span>Getting Info...</span>
+                      <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                      <span>Analyzing...</span>
                     </>
                   ) : (
                     <>
@@ -313,11 +388,11 @@ export function DownloadView() {
               </div>
 
               {/* Quick Actions */}
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3 pt-2">
                 <button
                   onClick={() => setShowSubtitleSelector(true)}
                   disabled={!url.trim()}
-                  className="flex items-center space-x-2 px-3 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 text-white rounded-lg text-sm transition-colors"
+                  className="flex items-center space-x-2 px-4 py-2.5 bg-purple-600/80 hover:bg-purple-600 disabled:bg-gray-700 disabled:text-gray-500 text-white rounded-xl text-sm font-medium transition-all duration-200 hover:scale-105"
                 >
                   <DocumentTextIcon className="w-4 h-4" />
                   <span>Subtitles</span>

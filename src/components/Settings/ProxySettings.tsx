@@ -3,7 +3,6 @@ import {
   WifiIcon,
   GlobeAltIcon,
   ArrowUpTrayIcon,
-  XMarkIcon,
   PlusIcon,
   ArrowPathIcon
 } from '@heroicons/react/24/outline';
