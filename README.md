@@ -8,6 +8,8 @@
 
 Una aplicacion de escritorio moderna para descargar videos de multiples plataformas con una interfaz intuitiva y potente sistema de gestion de descargas.
 
+![Pantalla Principal](Screenshots/Main.png)
+
 ## Caracteristicas
 
 ### Plataformas Soportadas
@@ -30,6 +32,8 @@ Una aplicacion de escritorio moderna para descargar videos de multiples platafor
 - Atajos de teclado para acciones rapidas
 - Actualizaciones automaticas
 
+![Cola de Descargas](Screenshots/Download.png)
+
 ### Caracteristicas Avanzadas
 - Deteccion automatica de FFmpeg y yt-dlp
 - Control de ancho de banda con horarios
@@ -37,6 +41,8 @@ Una aplicacion de escritorio moderna para descargar videos de multiples platafor
 - Notificaciones de progreso y completado
 - Historial de descargas
 - Proxy configurable
+
+![Vista Previa de Video](Screenshots/VideoPreview.png)
 
 ## Requisitos del Sistema
 
