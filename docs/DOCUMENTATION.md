@@ -1,11 +1,11 @@
-# 📚 MultiPlatform-Downloader - Documentación Completa
+# MultiPlatform-Downloader - Documentación Completa
 
 > **Consolidación de toda la documentación técnica del proyecto**  
 > *Última actualización: 25 Noviembre 2025*
 
 ---
 
-## 📋 Índice
+## Índice
 
 1. [Análisis del Proyecto](#-análisis-del-proyecto)
 2. [Bugfix: Error NaN en Argumentos](#-bugfix-error-nan-en-argumentos)
@@ -14,9 +14,9 @@
 
 ---
 
-# 📋 Análisis del Proyecto
+# Análisis del Proyecto
 
-## 📌 RESUMEN EJECUTIVO
+## RESUMEN EJECUTIVO
 
 **Nombre:** MultiPlatform-Downloader  
 **Versión:** 2.0.0  
@@ -26,7 +26,7 @@
 
 ---
 
-## 🎯 PROPÓSITO Y FUNCIONALIDADES
+## PROPÓSITO Y FUNCIONALIDADES
 
 ### Funcionalidades Principales:
 1. **Descarga de videos** de 7+ plataformas soportadas
@@ -44,17 +44,17 @@
 ### Plataformas Soportadas:
 | Plataforma | Estado | Reproducción |
 |------------|--------|--------------|
-| YouTube | ✅ | Embed nativo + Shorts |
-| TikTok | ✅ | Embed nativo |
-| Twitter/X | ✅ | Embed iframe |
-| Instagram | ✅ | Embed iframe |
-| Reddit | ✅ | Embed + fallback |
-| Twitch | ✅ | Proxy Electron |
-| Facebook | ✅ | Proxy Electron |
+| YouTube | Activo | Embed nativo + Shorts |
+| TikTok | Activo | Embed nativo |
+| Twitter/X | Activo | Embed iframe |
+| Instagram | Activo | Embed iframe |
+| Reddit | Activo | Embed + fallback |
+| Twitch | Activo | Proxy Electron |
+| Facebook | Activo | Proxy Electron |
 
 ---
 
-## 🏗️ ESTRUCTURA DEL PROYECTO
+## ESTRUCTURA DEL PROYECTO
 
 ```
 MultiPlatform-Downloader/
@@ -87,36 +87,36 @@ MultiPlatform-Downloader/
 
 ---
 
-## 🟢 ASPECTOS POSITIVOS
+## ASPECTOS POSITIVOS
 
-1. ✅ **Arquitectura bien estructurada** con separación de concerns
-2. ✅ **Sistema de plataformas extensible** (patrón Strategy)
-3. ✅ **Estado global con Zustand** bien implementado
-4. ✅ **Persistencia** de historial y configuraciones
-5. ✅ **UI moderna** con TailwindCSS y animaciones
-6. ✅ **Manejo de caché** para optimizar requests
-7. ✅ **Sistema de notificaciones** robusto
-8. ✅ **Control de ancho de banda** avanzado
-9. ✅ **Reproductor de video universal** con embeds nativos
-10. ✅ **Tres temas** (Default, Dark, Light)
+1. **Arquitectura bien estructurada** con separación de concerns
+2. **Sistema de plataformas extensible** (patrón Strategy)
+3. **Estado global con Zustand** bien implementado
+4. **Persistencia** de historial y configuraciones
+5. **UI moderna** con TailwindCSS y animaciones
+6. **Manejo de caché** para optimizar requests
+7. **Sistema de notificaciones** robusto
+8. **Control de ancho de banda** avanzado
+9. **Reproductor de video universal** con embeds nativos
+10. **Tres temas** (Default, Dark, Light)
 
 ---
 
-## 📊 MÉTRICAS DEL CÓDIGO
+## MÉTRICAS DEL CÓDIGO
 
 | Métrica | Valor | Estado |
 |---------|-------|--------|
-| Archivos TypeScript/TSX | ~40 | ✅ |
-| Líneas de código estimadas | ~10000 | ✅ |
-| Servicios | 10 | ✅ |
-| Componentes React | ~25 | ✅ |
-| Plataformas soportadas | 7 | ✅ |
+| Archivos TypeScript/TSX | ~40 | OK |
+| Líneas de código estimadas | ~10000 | OK |
+| Servicios | 10 | OK |
+| Componentes React | ~25 | OK |
+| Plataformas soportadas | 7 | OK |
 
 ---
 
-# 🔧 Bugfix: Error NaN en Argumentos
+# Bugfix: Error NaN en Argumentos
 
-## 🐛 Problema Identificado
+## Problema Identificado
 
 ### Error Original
 ```
@@ -125,7 +125,7 @@ MultiPlatform-Downloader/
 
 **Causa:** Cuando `job.quality` tiene el valor `'best'` o es inválido, `parseInt('best')` retorna `NaN`.
 
-## ✅ Solución Implementada
+## Solución Implementada
 
 ### Helper Centralizado en BasePlatform
 
@@ -164,9 +164,9 @@ protected parseQualityHeight(quality: string | undefined): number | null {
 
 ---
 
-# 🎬 Fix: Códec HEVC en Windows
+# Fix: Códec HEVC en Windows
 
-## 🔍 Problema Identificado
+## Problema Identificado
 
 ### Error de Windows
 ```
@@ -177,11 +177,11 @@ Necesitas un nuevo códec para reproducir este elemento
 **Causa:** Windows 10/11 **NO incluye el códec HEVC (H.265) por defecto**.
 
 ### Plataformas Afectadas
-- 🎵 **TikTok** - Usa HEVC frecuentemente
-- 📸 **Instagram** - Reels en HEVC
-- 📘 **Facebook** - Videos recientes en HEVC
+- **TikTok** - Usa HEVC frecuentemente
+- **Instagram** - Reels en HEVC
+- **Facebook** - Videos recientes en HEVC
 
-## ✅ Solución Implementada
+## Solución Implementada
 
 ### Estrategia: Re-codificación Automática a H.264
 
@@ -207,16 +207,16 @@ if (ffmpegPath) {
 
 | Aspecto | HEVC (H.265) | H.264 (Solución) |
 |---------|--------------|------------------|
-| **Compatibilidad** | ❌ Limitada | ✅ Universal |
-| **Windows** | ❌ $17 USD | ✅ Incluido |
+| **Compatibilidad** | Limitada | Universal |
+| **Windows** | $17 USD | Incluido |
 | **Tamaño** | Menor (~30%) | Normal |
 | **Calidad** | Excelente | Excelente |
 
 ---
 
-# 🐦 Solución: Problemas de Twitter/X
+# Solución: Problemas de Twitter/X
 
-## 🔍 Problema Identificado
+## Problema Identificado
 
 ### Error de yt-dlp
 ```
@@ -230,7 +230,7 @@ ERROR: [twitter] 1974473033017630952: No video could be found in this tweet
 4. Cambios en la API de Twitter
 5. Rate Limiting
 
-## ✅ Soluciones Implementadas
+## Soluciones Implementadas
 
 ### 1. Detección Mejorada de Errores
 
@@ -238,7 +238,7 @@ ERROR: [twitter] 1974473033017630952: No video could be found in this tweet
 if (stderr.includes('[twitter]') && stderr.includes('No video could be found')) {
   return {
     isRecoverable: false,
-    message: '❌ Twitter/X: Video not accessible. This may be due to:\n' +
+    message: 'Twitter/X: Video not accessible. This may be due to:\n' +
              '• Private or protected account\n' +
              '• Deleted tweet\n' +
              '• Age-restricted content\n' +
@@ -264,13 +264,13 @@ args.push('--no-check-certificate');
 | `Private video` | Video privado | No recuperable |
 | `HTTP Error 429` | Rate limited | Esperar |
 
-## 💡 Solución para Contenido Restringido: Cookies
+## Solución para Contenido Restringido: Cookies
 
 ### ¿Por qué usar cookies?
 Las cookies permiten a yt-dlp autenticarse como si fueras tú:
-- ✅ Contenido restringido por edad
-- ✅ Tweets de cuentas que sigues
-- ✅ Contenido sensible
+- Contenido restringido por edad
+- Tweets de cuentas que sigues
+- Contenido sensible
 
 ### Cómo exportar cookies:
 
@@ -281,7 +281,7 @@ Las cookies permiten a yt-dlp autenticarse como si fueras tú:
 
 ---
 
-# 🎬 VideoPlayer Universal
+# VideoPlayer Universal
 
 ## Arquitectura
 
@@ -308,7 +308,7 @@ Platform Detection →
 
 ---
 
-# 🎨 Sistema de Temas
+# Sistema de Temas
 
 ## Tres Temas Disponibles
 

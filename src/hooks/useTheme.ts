@@ -14,13 +14,13 @@ export function useTheme() {
       if (theme === 'system') {
         // System = Default theme (no class, uses :root styles)
         // El tema por defecto es el azul premium
-        console.log('🎨 Theme applied: default/system (premium blue)');
+        console.log('Theme applied: default/system (premium blue)');
       } else if (theme === 'dark') {
         root.classList.add('dark');
-        console.log('🎨 Theme applied: dark (pure grays)');
+        console.log('Theme applied: dark (pure grays)');
       } else if (theme === 'light') {
         root.classList.add('light');
-        console.log('🎨 Theme applied: light');
+        console.log('Theme applied: light');
       }
       
       // Aplicar meta theme-color para la barra del navegador/app

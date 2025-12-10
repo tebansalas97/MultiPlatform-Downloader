@@ -16,14 +16,14 @@ import { InstagramPlatform } from './instagram/InstagramPlatform';
  * Inicializar y registrar todas las plataformas
  */
 export function registerAllPlatforms(): void {
-  console.log('🔧 Registering all platforms...');
+  console.log('Registering all platforms...');
 
   // BLOQUE 1: YouTube (ACTIVO)
   try {
     const youtube = new YouTubePlatform();
     platformService.register(youtube);
   } catch (error) {
-    console.error('❌ Failed to register YouTube:', error);
+    console.error('Failed to register YouTube:', error);
   }
 
   // BLOQUE 2: TikTok (ACTIVO)

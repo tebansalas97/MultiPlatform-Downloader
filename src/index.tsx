@@ -6,7 +6,7 @@ import reportWebVitals from './reportWebVitals';
 
 // Inicializar servicios
 import './services/VideoInfoService';
-import './services/platforms/registerPlatforms'; // 🆕 Inicializar plataformas
+import './services/platforms/registerPlatforms'; // Inicializar plataformas
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

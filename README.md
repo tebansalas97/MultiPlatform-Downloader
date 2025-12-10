@@ -1,48 +1,50 @@
-# 🎬 MultiPlatform Downloader
+# MultiPlatform Downloader
 
 [![React](https://img.shields.io/badge/React-19.1.1-61DAFB?logo=react)](https://reactjs.org/)
 [![Electron](https://img.shields.io/badge/Electron-38.1.2-47848F?logo=electron)](https://www.electronjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-4.9.5-3178C6?logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4.17-06B6D4?logo=tailwindcss)](https://tailwindcss.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Una aplicación de escritorio moderna para descargar videos de múltiples plataformas con una interfaz intuitiva y potente sistema de gestión de descargas.
+Una aplicacion de escritorio moderna para descargar videos de multiples plataformas con una interfaz intuitiva y potente sistema de gestion de descargas.
 
-## ✨ Características
+## Caracteristicas
 
-### 🌐 Plataformas Soportadas
+### Plataformas Soportadas
 - **YouTube** - Videos, Shorts, y Playlists completas
-- **TikTok** - Videos públicos
+- **TikTok** - Videos publicos
 - **Twitter/X** - Videos de tweets
 - **Instagram** - Reels y videos de posts
 - **Reddit** - Videos de posts
 - **Twitch** - Clips y VODs
-- **Facebook** - Videos públicos
+- **Facebook** - Videos publicos
 
-### 🎯 Funcionalidades Principales
-- 📥 **Descarga de video/audio** en múltiples calidades (hasta 4K)
-- 🎵 **Extracción de audio** en MP3, M4A, WAV, FLAC
-- 📋 **Descarga de playlists** completas de YouTube
-- 🔄 **Cola de descargas** con gestión de prioridad
-- ⏸️ **Pausar/Reanudar** descargas en progreso
-- 📊 **Monitor de ancho de banda** con límites configurables
-- 🌙 **Tema oscuro** moderno
-- ⌨️ **Atajos de teclado** para acciones rápidas
+### Funcionalidades Principales
+- Descarga de video/audio en multiples calidades (hasta 4K)
+- Extraccion de audio en MP3, M4A, WAV, FLAC
+- Descarga de playlists completas de YouTube
+- Cola de descargas con gestion de prioridad
+- Pausar/Reanudar descargas en progreso
+- Monitor de ancho de banda con limites configurables
+- Tema oscuro moderno
+- Atajos de teclado para acciones rapidas
+- Actualizaciones automaticas
 
-### ⚙️ Características Avanzadas
-- 🔧 **Detección automática** de FFmpeg y yt-dlp
-- 📈 **Control de ancho de banda** con horarios
-- 💾 **Sistema de caché** para metadata
-- 🔔 **Notificaciones** de progreso y completado
-- 📝 **Historial** de descargas
-- 🔀 **Proxy** configurable
+### Caracteristicas Avanzadas
+- Deteccion automatica de FFmpeg y yt-dlp
+- Control de ancho de banda con horarios
+- Sistema de cache para metadata
+- Notificaciones de progreso y completado
+- Historial de descargas
+- Proxy configurable
 
-## 📋 Requisitos del Sistema
+## Requisitos del Sistema
 
 ### Dependencias Externas (Obligatorias)
 - **[yt-dlp](https://github.com/yt-dlp/yt-dlp)** - Motor de descarga de videos
 - **[FFmpeg](https://ffmpeg.org/)** - Procesamiento y merge de video/audio
 
-### Instalación de Dependencias
+### Instalacion de Dependencias
 
 #### Windows
 ```powershell
@@ -73,17 +75,17 @@ sudo dnf install yt-dlp ffmpeg
 sudo pacman -S yt-dlp ffmpeg
 ```
 
-## 🚀 Instalación
+## Instalacion
 
-### Opción 1: Descargar el Instalador
-Descarga la última versión desde [Releases](https://github.com/tu-usuario/multiplatform-downloader/releases).
+### Opcion 1: Descargar el Instalador
+Descarga la ultima version desde [Releases](https://github.com/tebansalas97/MultiPlatform-Downloader/releases).
 
-### Opción 2: Compilar desde Código Fuente
+### Opcion 2: Compilar desde Codigo Fuente
 
 ```bash
 # Clonar el repositorio
-git clone https://github.com/tu-usuario/multiplatform-downloader.git
-cd multiplatform-downloader
+git clone https://github.com/tebansalas97/MultiPlatform-Downloader.git
+cd MultiPlatform-Downloader
 
 # Instalar dependencias
 npm install
@@ -95,21 +97,21 @@ npm run electron-dev
 npm run dist
 ```
 
-## 🛠️ Scripts Disponibles
+## Scripts Disponibles
 
-| Script | Descripción |
+| Script | Descripcion |
 |--------|-------------|
 | `npm start` | Inicia el servidor de desarrollo React |
 | `npm run electron-dev` | Inicia la app en modo desarrollo |
-| `npm run build` | Compila la aplicación React |
+| `npm run build` | Compila la aplicacion React |
 | `npm run dist` | Crea el instalador de escritorio |
 | `npm test` | Ejecuta las pruebas |
 
-## 📖 Uso
+## Uso
 
-### Descarga Básica
+### Descarga Basica
 1. Copia la URL del video
-2. Pega en la aplicación (o usa `Ctrl+V`)
+2. Pega en la aplicacion (o usa `Ctrl+V`)
 3. Selecciona la calidad deseada
 4. Haz clic en "Descargar"
 
@@ -120,57 +122,57 @@ npm run dist
 4. Inicia la descarga
 
 ### Atajos de Teclado
-| Atajo | Acción |
+| Atajo | Accion |
 |-------|--------|
 | `Ctrl+V` | Pegar URL |
 | `Ctrl+Shift+D` | Descargar URL pegada |
 | `Ctrl+O` | Abrir carpeta de descargas |
-| `Ctrl+,` | Abrir configuración |
-| `Esc` | Cerrar diálogo actual |
+| `Ctrl+,` | Abrir configuracion |
+| `Esc` | Cerrar dialogo actual |
 
-## 🏗️ Arquitectura del Proyecto
+## Arquitectura del Proyecto
 
 ```
 src/
 ├── components/
 │   ├── Download/      # Componentes de descarga
 │   ├── Layout/        # Estructura de la UI
-│   ├── Settings/      # Configuración
-│   ├── ui/           # Componentes reutilizables
-│   └── Views/        # Vistas principales
+│   ├── Settings/      # Configuracion
+│   ├── ui/            # Componentes reutilizables
+│   └── Views/         # Vistas principales
 ├── config/
 │   ├── constants.ts   # Constantes de la app
-│   └── webMode.ts    # Configuración web
-├── hooks/            # Custom React hooks
+│   └── webMode.ts     # Configuracion web
+├── hooks/             # Custom React hooks
 ├── services/
-│   ├── platforms/    # Implementaciones por plataforma
-│   └── *.ts         # Servicios principales
-├── stores/           # Estado global (Zustand)
-├── types/            # TypeScript interfaces
-└── utils/            # Utilidades
+│   ├── platforms/     # Implementaciones por plataforma
+│   └── *.ts           # Servicios principales
+├── stores/            # Estado global (Zustand)
+├── types/             # TypeScript interfaces
+└── utils/             # Utilidades
 ```
 
-## 🔧 Configuración
+## Configuracion
 
-### Límite de Ancho de Banda
-Configura límites de velocidad en `Configuración > Ancho de Banda`:
-- Límite global (KB/s)
-- Horarios de límite automático
-- Modo adaptativo según red
+### Limite de Ancho de Banda
+Configura limites de velocidad en Configuracion > Ancho de Banda:
+- Limite global (KB/s)
+- Horarios de limite automatico
+- Modo adaptativo segun red
 
 ### Proxy
-Configura un proxy en `Configuración > Proxy`:
+Configura un proxy en Configuracion > Proxy:
 - HTTP/HTTPS/SOCKS5
-- Autenticación opcional
+- Autenticacion opcional
 
 ### Carpeta de Descargas
-Cambia la carpeta por defecto en `Configuración > General`.
+Cambia la carpeta por defecto en Configuracion > General.
 
-## 🐛 Solución de Problemas
+## Solucion de Problemas
 
 ### FFmpeg no detectado
 ```powershell
-# Verificar instalación
+# Verificar instalacion
 ffmpeg -version
 
 # Reinstalar con winget
@@ -178,15 +180,15 @@ winget install --id=Gyan.FFmpeg -e --force
 ```
 
 ### Error de descarga
-- Verifica que el video sea público
+- Verifica que el video sea publico
 - Actualiza yt-dlp: `yt-dlp -U`
-- Revisa tu conexión a internet
+- Revisa tu conexion a internet
 
 ### Video sin audio
-- Asegúrate de que FFmpeg esté instalado
-- Reinicia la aplicación
+- Asegurate de que FFmpeg este instalado
+- Reinicia la aplicacion
 
-## 🤝 Contribuir
+## Contribuir
 
 1. Fork el repositorio
 2. Crea tu rama (`git checkout -b feature/nueva-feature`)
@@ -194,11 +196,11 @@ winget install --id=Gyan.FFmpeg -e --force
 4. Push a la rama (`git push origin feature/nueva-feature`)
 5. Abre un Pull Request
 
-## 📄 Licencia
+## Licencia
 
-Este proyecto está bajo la Licencia MIT - ver [LICENSE](LICENSE) para más detalles.
+Este proyecto esta bajo la Licencia MIT - ver [LICENSE](LICENSE) para mas detalles.
 
-## 🙏 Agradecimientos
+## Agradecimientos
 
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp) - El motor de descarga
 - [FFmpeg](https://ffmpeg.org/) - Procesamiento de video
@@ -208,6 +210,4 @@ Este proyecto está bajo la Licencia MIT - ver [LICENSE](LICENSE) para más deta
 
 ---
 
-<div align="center">
-  Hecho con ❤️ por Esteban Salas
-</div>
+Desarrollado por Esteban Salas

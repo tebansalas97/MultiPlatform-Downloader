@@ -45,7 +45,7 @@ export function useKeyboardShortcuts(callbacks?: KeyboardShortcuts) {
         (event.target as HTMLElement)?.isContentEditable
       );
 
-      // 📋 Ctrl/Cmd + V - Pegar URL desde clipboard
+      // Ctrl/Cmd + V - Pegar URL desde clipboard
       if ((event.ctrlKey || event.metaKey) && event.key === 'v' && !isInputActive) {
         event.preventDefault();
         try {
@@ -58,7 +58,7 @@ export function useKeyboardShortcuts(callbacks?: KeyboardShortcuts) {
         }
       }
 
-      // 🗑️ Ctrl/Cmd + Shift + C - Limpiar cola
+      // Ctrl/Cmd + Shift + C - Limpiar cola
       if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'C') {
         event.preventDefault();
         if (jobs.length > 0) {
@@ -66,14 +66,14 @@ export function useKeyboardShortcuts(callbacks?: KeyboardShortcuts) {
         }
       }
 
-      // ⚙️ Ctrl/Cmd + , - Abrir configuraciones
+      // Ctrl/Cmd + , - Abrir configuraciones
       if ((event.ctrlKey || event.metaKey) && event.key === ',') {
         event.preventDefault();
         setActiveView('settings');
         callbacks?.onToggleSettings?.();
       }
 
-      // 🔄 Ctrl/Cmd + 1,2,3 - Cambiar vistas
+      // Ctrl/Cmd + 1,2,3 - Cambiar vistas
       if ((event.ctrlKey || event.metaKey) && ['1', '2', '3'].includes(event.key)) {
         event.preventDefault();
         const views = ['download', 'history', 'settings'] as const;
@@ -83,13 +83,13 @@ export function useKeyboardShortcuts(callbacks?: KeyboardShortcuts) {
         }
       }
 
-      // 🔄 F5 - Refresh/Restart downloads
+      // F5 - Refresh/Restart downloads
       if (event.key === 'F5' && !isInputActive) {
         event.preventDefault();
         downloadService.processQueue();
       }
 
-      // ❌ Escape - Cerrar modales o cancel downloads
+      // Escape - Cerrar modales o cancel downloads
       if (event.key === 'Escape') {
         event.preventDefault();
         const activeDownloads = downloadService.getActiveDownloads();
@@ -98,7 +98,7 @@ export function useKeyboardShortcuts(callbacks?: KeyboardShortcuts) {
         });
       }
 
-      // 📋 Ctrl/Cmd + A - Seleccionar todo en playlist preview
+      // Ctrl/Cmd + A - Seleccionar todo en playlist preview
       if ((event.ctrlKey || event.metaKey) && event.key === 'a' && !isInputActive) {
         const playlistPreview = document.querySelector('[data-playlist-preview]');
         if (playlistPreview) {
@@ -107,13 +107,13 @@ export function useKeyboardShortcuts(callbacks?: KeyboardShortcuts) {
         }
       }
 
-      // 🚀 Ctrl/Cmd + Enter - Forzar inicio de descarga
+      // Ctrl/Cmd + Enter - Forzar inicio de descarga
       if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
         event.preventDefault();
         downloadService.processQueue();
       }
 
-      // 📋 Ctrl/Cmd + D - Duplicar última descarga
+      // Ctrl/Cmd + D - Duplicar última descarga
       if ((event.ctrlKey || event.metaKey) && event.key === 'd' && !isInputActive) {
         event.preventDefault();
         const lastJob = jobs[jobs.length - 1];
@@ -124,7 +124,7 @@ export function useKeyboardShortcuts(callbacks?: KeyboardShortcuts) {
         }
       }
 
-      // 👁️ Alt + Enter - Previsualizar video antes de descargar
+      // Alt + Enter - Previsualizar video antes de descargar
       if (event.altKey && event.key === 'Enter' && !isInputActive) {
         event.preventDefault();
         window.dispatchEvent(new CustomEvent('preview-video'));

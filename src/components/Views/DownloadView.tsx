@@ -191,7 +191,7 @@ export function DownloadView() {
 
   const handlePlaylistDownload = async (selectedUrls: string[]) => {
     // Mostrar loading o notificación
-    console.log(`🎬 Adding ${selectedUrls.length} videos from playlist to queue...`);
+    console.log(`Adding ${selectedUrls.length} videos from playlist to queue...`);
 
     // Cerrar el modal inmediatamente
     setUrl('');
@@ -252,7 +252,7 @@ export function DownloadView() {
       }
     }
 
-    console.log(`✅ ${selectedUrls.length} videos added to queue`);
+    console.log(`${selectedUrls.length} videos added to queue`);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -471,7 +471,7 @@ export function DownloadView() {
 
           {/* Instructions */}
           <div className="bg-blue-900/20 border border-blue-500/50 rounded-lg p-4">
-            <h4 className="text-blue-300 font-medium mb-2">💡 Tips</h4>
+            <h4 className="text-blue-300 font-medium mb-2">Tips</h4>
             <ul className="text-blue-200 text-sm space-y-1">
               <li>• Copy YouTube URLs and paste them with Ctrl+V</li>
               <li>• Drag URLs directly from your browser address bar</li>

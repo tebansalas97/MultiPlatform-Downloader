@@ -14,7 +14,6 @@ export function showWebModeWarning() {
     warning.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-yellow-600 text-white px-6 py-3 rounded-lg shadow-lg animate-slide-down';
     warning.innerHTML = `
       <div class="flex items-center space-x-3">
-        <span class="text-2xl">⚠️</span>
         <div class="flex-1">
           <div class="font-semibold">Running in Browser Mode</div>
           <div class="text-sm opacity-90">Some features are limited. Download the desktop app for full functionality.</div>
