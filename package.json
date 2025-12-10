@@ -73,8 +73,8 @@
     "wait-on": "^9.0.0"
   },
   "build": {
-    "appId": "com.youtube.downloader",
-    "productName": "YouTubeDownloader",
+    "appId": "com.multiplatform.downloader",
+    "productName": "MultiPlatformDownloader",
     "publish": [
       {
         "provider": "github",
