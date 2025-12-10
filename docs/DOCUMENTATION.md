@@ -1,333 +1,125 @@
-# MultiPlatform-Downloader - Documentación Completa
+# MultiPlatform-Downloader - Documentacion Tecnica
 
-> **Consolidación de toda la documentación técnica del proyecto**  
-> *Última actualización: 25 Noviembre 2025*
-
----
-
-## Índice
-
-1. [Análisis del Proyecto](#-análisis-del-proyecto)
-2. [Bugfix: Error NaN en Argumentos](#-bugfix-error-nan-en-argumentos)
-3. [Fix: Códec HEVC en Windows](#-fix-códec-hevc-en-windows)
-4. [Solución: Problemas de Twitter/X](#-solución-problemas-de-twitterx)
+> **Manual completo de usuario y desarrollador**
+> *Version: 2.0.0*
 
 ---
 
-# Análisis del Proyecto
+## Indice
 
-## RESUMEN EJECUTIVO
-
-**Nombre:** MultiPlatform-Downloader  
-**Versión:** 2.0.0  
-**Autor:** Esteban Salas  
-**Stack Tecnológico:** React 19 + TypeScript + Electron 38 + TailwindCSS + Zustand  
-**Propósito:** Aplicación de escritorio para descargar videos de múltiples plataformas
-
----
-
-## PROPÓSITO Y FUNCIONALIDADES
-
-### Funcionalidades Principales:
-1. **Descarga de videos** de 7+ plataformas soportadas
-2. **Descarga de audio** (extracción MP3)
-3. **Descarga de playlists** completas
-4. **Recorte de videos** (clips con tiempo inicio/fin)
-5. **Subtítulos** (descarga y embebido)
-6. **Cola de descargas** con múltiples descargas concurrentes
-7. **Historial** de descargas completadas
-8. **Control de ancho de banda** y programación horaria
-9. **Caché** de información de videos
-10. **Notificaciones** de sistema
-11. **Vista previa con reproductor integrado** para todas las plataformas
-
-### Plataformas Soportadas:
-| Plataforma | Estado | Reproducción |
-|------------|--------|--------------|
-| YouTube | Activo | Embed nativo + Shorts |
-| TikTok | Activo | Embed nativo |
-| Twitter/X | Activo | Embed iframe |
-| Instagram | Activo | Embed iframe |
-| Reddit | Activo | Embed + fallback |
-| Twitch | Activo | Proxy Electron |
-| Facebook | Activo | Proxy Electron |
+1. [Introduccion](#introduccion)
+2. [Caracteristicas y Funcionalidades](#caracteristicas-y-funcionalidades)
+3. [Guia de Usuario](#guia-de-usuario)
+4. [Arquitectura Tecnica](#arquitectura-tecnica)
+5. [Configuracion y Ajustes](#configuracion-y-ajustes)
+6. [Solucion de Problemas Comunes](#solucion-de-problemas-comunes)
 
 ---
 
-## ESTRUCTURA DEL PROYECTO
+# Introduccion
 
-```
-MultiPlatform-Downloader/
-├── public/
-│   └── electron.js          # Main process de Electron
-├── src/
-│   ├── App.tsx              # Componente principal React
-│   ├── index.tsx            # Entry point
-│   ├── components/
-│   │   ├── Download/        # Componentes de descarga
-│   │   │   ├── DownloadQueue.tsx
-│   │   │   ├── VideoPreview.tsx
-│   │   │   ├── VideoPlayer.tsx    # Reproductor universal
-│   │   │   ├── PlaylistPreview.tsx
-│   │   │   └── SubtitleSelector.tsx
-│   │   ├── Layout/          # Estructura de la app
-│   │   ├── Views/           # Vistas principales
-│   │   ├── Settings/        # Configuraciones
-│   │   └── ui/              # Componentes UI reutilizables
-│   ├── services/            # Lógica de negocio
-│   │   ├── DownloadService.ts
-│   │   └── platforms/       # Implementaciones por plataforma
-│   ├── stores/              # Estado global (Zustand)
-│   ├── types/               # Tipos TypeScript
-│   ├── hooks/               # Custom hooks
-│   └── utils/               # Utilidades
-├── docs/                    # Documentación
-└── package.json
-```
+**MultiPlatform-Downloader** es una aplicacion de escritorio robusta y moderna diseñada para facilitar la descarga de contenido multimedia desde las plataformas sociales mas populares. Construida con tecnologias web de vanguardia (React, TypeScript) sobre el framework Electron, ofrece una experiencia de usuario fluida y nativa en Windows.
+
+El objetivo principal del proyecto es unificar la descarga de videos y audio en una sola herramienta, eliminando la necesidad de utilizar multiples sitios web llenos de publicidad o herramientas de linea de comandos complejas.
 
 ---
 
-## ASPECTOS POSITIVOS
+# Caracteristicas y Funcionalidades
 
-1. **Arquitectura bien estructurada** con separación de concerns
-2. **Sistema de plataformas extensible** (patrón Strategy)
-3. **Estado global con Zustand** bien implementado
-4. **Persistencia** de historial y configuraciones
-5. **UI moderna** con TailwindCSS y animaciones
-6. **Manejo de caché** para optimizar requests
-7. **Sistema de notificaciones** robusto
-8. **Control de ancho de banda** avanzado
-9. **Reproductor de video universal** con embeds nativos
-10. **Tres temas** (Default, Dark, Light)
+### Soporte Multi-Plataforma
+La aplicacion es capaz de detectar y procesar enlaces de:
+*   **YouTube**: Videos individuales, Shorts, y Playlists completas.
+*   **TikTok**: Videos sin marca de agua (cuando es posible).
+*   **Twitter/X**: Videos de tweets.
+*   **Instagram**: Reels y videos de publicaciones.
+*   **Facebook**: Videos publicos.
+*   **Twitch**: Clips y VODs.
+*   **Reddit**: Videos embebidos en posts.
 
----
+### Motor de Descarga Potente
+*   **Alta Calidad**: Soporte para resoluciones hasta 4K y 8K si estan disponibles.
+*   **Formatos de Audio**: Extraccion directa a MP3, M4A, WAV y FLAC con metadatos.
+*   **Subtitulos**: Descarga automatica de subtitulos y opcion para incrustarlos en el video.
+*   **Recorte de Video**: Herramienta integrada para descargar solo un fragmento especifico del video.
 
-## MÉTRICAS DEL CÓDIGO
+### Gestion de Descargas
+*   **Cola de Descargas**: Añade multiples enlaces y deja que la aplicacion los procese secuencialmente o en paralelo.
+*   **Control de Ancho de Banda**: Limita la velocidad de descarga para no saturar tu red.
+*   **Programacion**: Define horarios en los que las descargas estan permitidas.
+*   **Reintentos Automaticos**: Sistema inteligente que reintenta descargas fallidas por problemas de red.
 
-| Métrica | Valor | Estado |
-|---------|-------|--------|
-| Archivos TypeScript/TSX | ~40 | OK |
-| Líneas de código estimadas | ~10000 | OK |
-| Servicios | 10 | OK |
-| Componentes React | ~25 | OK |
-| Plataformas soportadas | 7 | OK |
-
----
-
-# Bugfix: Error NaN en Argumentos
-
-## Problema Identificado
-
-### Error Original
-```
--f best[height<=NaN]
-```
-
-**Causa:** Cuando `job.quality` tiene el valor `'best'` o es inválido, `parseInt('best')` retorna `NaN`.
-
-## Solución Implementada
-
-### Helper Centralizado en BasePlatform
-
-#### `parseQualityHeight(quality: string | undefined): number | null`
-- Parsea calidad de video de forma **segura**
-- Retorna `null` si la calidad es inválida o 'best'/'worst'
-- Valida rangos razonables (0 < height <= 8192)
-
-```typescript
-protected parseQualityHeight(quality: string | undefined): number | null {
-  if (!quality || quality === 'best' || quality === 'worst') {
-    return null;
-  }
-
-  const match = quality.match(/^(\d+)p?/);
-  if (!match) return null;
-
-  const height = parseInt(match[1], 10);
-
-  if (isNaN(height) || height <= 0 || height > 8192) {
-    return null;
-  }
-
-  return height;
-}
-```
-
-### Casos de Prueba
-
-| Input | Output | Resultado |
-|-------|--------|-----------|
-| `'best'` | `null` | `-f bestvideo+bestaudio/best` |
-| `'1080p'` | `1080` | `-f bestvideo[height<=1080]+bestaudio/best` |
-| `'720p60'` | `720` | `-f bestvideo[height<=720]+bestaudio/best` |
-| `'invalid'` | `null` | `-f bestvideo+bestaudio/best` (fallback) |
+### Interfaz de Usuario
+*   **Temas**: Soporte para modo Claro, Oscuro y tema por defecto (Azul Premium).
+*   **Vista Previa**: Reproductor integrado para verificar el video antes de descargarlo.
+*   **Historial**: Registro persistente de todas las descargas realizadas.
 
 ---
 
-# Fix: Códec HEVC en Windows
+# Guia de Usuario
 
-## Problema Identificado
+### Descargar un Video
+1.  Copia el enlace del video desde tu navegador.
+2.  La aplicacion detectara automaticamente el enlace si tienes el monitoreo del portapapeles activo, o puedes pegarlo manualmente con `Ctrl+V`.
+3.  La aplicacion analizara el video y mostrara sus detalles (titulo, duracion, miniatura).
+4.  Selecciona el formato (Video+Audio, Solo Video, Solo Audio) y la calidad deseada.
+5.  Haz clic en **"Add to Queue"**.
 
-### Error de Windows
-```
-Necesitas un nuevo códec para reproducir este elemento
-"Extensiones de video HEVC", disponible en Microsoft Store. $17.00
-```
+### Descargar una Playlist
+1.  Pega el enlace de una lista de reproduccion de YouTube.
+2.  Se abrira una ventana modal mostrando todos los videos de la lista.
+3.  Puedes seleccionar/deseleccionar videos especificos.
+4.  Haz clic en **"Download Selected"** para añadir todos a la cola.
 
-**Causa:** Windows 10/11 **NO incluye el códec HEVC (H.265) por defecto**.
-
-### Plataformas Afectadas
-- **TikTok** - Usa HEVC frecuentemente
-- **Instagram** - Reels en HEVC
-- **Facebook** - Videos recientes en HEVC
-
-## Solución Implementada
-
-### Estrategia: Re-codificación Automática a H.264
-
-```typescript
-if (ffmpegPath) {
-  // Re-codificar a H.264 para compatibilidad universal
-  args.push('--recode-video', 'mp4');
-  args.push('--postprocessor-args', 'ffmpeg:-c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k');
-}
-```
-
-### Parámetros de FFmpeg
-
-| Parámetro | Descripción |
-|-----------|-------------|
-| `--recode-video mp4` | Fuerza re-codificación |
-| `-c:v libx264` | Códec H.264 (universal) |
-| `-preset fast` | Balance velocidad/calidad |
-| `-crf 23` | Calidad visual sin pérdida |
-| `-c:a aac -b:a 128k` | Audio AAC a 128 kbps |
-
-### Comparación: HEVC vs H.264
-
-| Aspecto | HEVC (H.265) | H.264 (Solución) |
-|---------|--------------|------------------|
-| **Compatibilidad** | Limitada | Universal |
-| **Windows** | $17 USD | Incluido |
-| **Tamaño** | Menor (~30%) | Normal |
-| **Calidad** | Excelente | Excelente |
+### Actualizaciones Automaticas
+La aplicacion busca actualizaciones cada vez que se inicia. Si encuentra una nueva version (ej. v2.0.1), la descargara en segundo plano y te notificara para reiniciar e instalar. No es necesario visitar la pagina web nuevamente.
 
 ---
 
-# Solución: Problemas de Twitter/X
+# Arquitectura Tecnica
 
-## Problema Identificado
+El proyecto sigue una arquitectura moderna basada en **Electron** con **React**.
 
-### Error de yt-dlp
-```
-ERROR: [twitter] 1974473033017630952: No video could be found in this tweet
-```
+### Stack Tecnologico
+*   **Frontend**: React 19, TypeScript, TailwindCSS, Framer Motion.
+*   **Backend (Main Process)**: Electron 38, Node.js.
+*   **Estado**: Zustand para gestion de estado global.
+*   **Core**: `yt-dlp` para la interaccion con las plataformas y `ffmpeg` para el procesamiento multimedia.
 
-**Causas Posibles:**
-1. Cuenta Privada/Protegida
-2. Video Eliminado
-3. Contenido Restringido por Edad
-4. Cambios en la API de Twitter
-5. Rate Limiting
+### Estructura de Directorios
+*   `src/components`: Componentes de React divididos por funcionalidad (Download, Settings, UI).
+*   `src/services`: Logica de negocio. Aqui reside el `DownloadService` que orquesta las descargas y el `PlatformService` que maneja las estrategias por plataforma.
+*   `src/stores`: Stores de Zustand para persistencia de datos.
+*   `public/electron.js`: Punto de entrada del proceso principal de Electron.
 
-## Soluciones Implementadas
-
-### 1. Detección Mejorada de Errores
-
-```typescript
-if (stderr.includes('[twitter]') && stderr.includes('No video could be found')) {
-  return {
-    isRecoverable: false,
-    message: 'Twitter/X: Video not accessible. This may be due to:\n' +
-             '• Private or protected account\n' +
-             '• Deleted tweet\n' +
-             '• Age-restricted content\n' +
-             '• Video removed by Twitter'
-  };
-}
-```
-
-### 2. Headers y User-Agent Mejorados
-
-```typescript
-args.push('--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ...');
-args.push('--add-header', 'Referer:https://twitter.com/');
-args.push('--no-check-certificate');
-```
-
-### 3. Estrategias de Descarga
-
-| Error | Mensaje | Acción |
-|-------|---------|--------|
-| `No video could be found` | Video no accesible | Sugerir cookies |
-| `Login required` | Autenticación requerida | Sugerir cookies |
-| `Private video` | Video privado | No recuperable |
-| `HTTP Error 429` | Rate limited | Esperar |
-
-## Solución para Contenido Restringido: Cookies
-
-### ¿Por qué usar cookies?
-Las cookies permiten a yt-dlp autenticarse como si fueras tú:
-- Contenido restringido por edad
-- Tweets de cuentas que sigues
-- Contenido sensible
-
-### Cómo exportar cookies:
-
-1. **Instalar extensión** "Get cookies.txt LOCALLY"
-2. **Iniciar sesión** en Twitter/X
-3. **Exportar** el archivo `cookies.txt`
-4. **Usar:** `yt-dlp --cookies /path/to/cookies.txt [URL]`
+### Patron de Diseño: Strategy
+Para manejar multiples plataformas, se utiliza el patron Strategy. Cada plataforma (YouTube, TikTok, etc.) tiene su propia clase que implementa una interfaz comun `IPlatform`. Esto permite añadir nuevas plataformas facilmente sin modificar el codigo base del servicio de descargas.
 
 ---
 
-# VideoPlayer Universal
+# Configuracion y Ajustes
 
-## Arquitectura
+### General
+*   **Carpeta de Descargas**: Define donde se guardaran los archivos.
+*   **Descargas Simultaneas**: Configura cuantos videos se pueden descargar al mismo tiempo (1-4).
 
-```
-Platform Detection →
-  ├─ YouTube (regular + Shorts) → iframe embed
-  ├─ TikTok → iframe embed nativo
-  ├─ Twitter/X → iframe embed
-  ├─ Instagram → iframe embed
-  ├─ Reddit → iframe + fallback
-  └─ Others → Electron IPC Proxy → HTML5 video
-```
+### Red
+*   **Limite de Velocidad**: Establece un limite maximo de descarga (ej. 5 MB/s).
+*   **Proxy**: Configuracion de proxy HTTP/HTTPS para evadir restricciones regionales.
 
-## Componentes
-
-| Componente | Plataforma | Método |
-|------------|------------|--------|
-| `YouTubeEmbed` | YouTube | `youtube.com/embed/{id}` |
-| `TikTokEmbed` | TikTok | `tiktok.com/embed/v2/{id}` |
-| `TwitterEmbed` | Twitter/X | `platform.twitter.com/embed` |
-| `InstagramEmbed` | Instagram | `instagram.com/p/{id}/embed` |
-| `RedditEmbed` | Reddit | `redditmedia.com` |
-| `ProxyVideoPlayer` | Otros | Proxy via Electron IPC |
+### Avanzado
+*   **Cookies**: Importacion de cookies (formato Netscape) para descargar contenido con restriccion de edad o premium.
 
 ---
 
-# Sistema de Temas
+# Solucion de Problemas Comunes
 
-## Tres Temas Disponibles
+### Videos de TikTok/Instagram no se reproducen en Windows
+**Causa**: Windows no incluye el codec HEVC por defecto.
+**Solucion**: La aplicacion ahora convierte automaticamente estos videos al formato H.264 (universal) durante la descarga, por lo que seran compatibles con cualquier reproductor sin necesidad de instalar extensiones de pago.
 
-### Default (Premium Blue)
-- Gradientes azules premium
-- Efectos glassmorphism
-- Look moderno y elegante
+### Error en Twitter/X "No video found"
+**Causa**: El tweet puede ser de una cuenta privada o contenido sensible.
+**Solucion**: Asegurate de que el tweet es publico. Para contenido restringido, es necesario configurar las cookies en la seccion de ajustes.
 
-### Dark (Pure)
-- Grises puros (#0a0a0a, #141414)
-- Sin tinte azul
-- Máximo contraste
-
-### Light (Clean)
-- Fondos blancos/grises claros
-- Texto de alta legibilidad
-- Tips en azul oscuro (#1e40af)
-
----
-
-*Documentación consolidada el: 25 Noviembre 2025*  
-*Análisis y desarrollo: GitHub Copilot (Claude Opus 4.5)*
+### La descarga falla inmediatamente
+**Solucion**: Verifica tu conexion a internet. Si el problema persiste, intenta actualizar los binarios de `yt-dlp` (la aplicacion intenta hacerlo automaticamente, pero puede requerir reinicio).
