@@ -11,6 +11,20 @@
 # production
 /build
 
+# Electron Builder - Archivos de distribución (>100MB para GitHub)
+/dist
+dist/
+*.exe
+*.blockmap
+*.AppImage
+*.dmg
+*.snap
+*.deb
+*.rpm
+win-unpacked/
+mac/
+linux-unpacked/
+
 # misc
 .DS_Store
 .env.local

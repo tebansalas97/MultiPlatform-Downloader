@@ -30,6 +30,7 @@ class ElectronApiWrapper implements ElectronApi {
   private fs: any;
   private path: any;
   private shell: any;
+  private ipcRenderer: any;
 
   constructor() {
     // Detectar Electron de forma más robusta
@@ -53,8 +54,9 @@ class ElectronApiWrapper implements ElectronApi {
         this.childProcess = window.require('child_process');
         this.fs = window.require('fs');
         this.path = window.require('path');
-        const { shell } = window.require('electron');
+        const { shell, ipcRenderer } = window.require('electron');
         this.shell = shell;
+        this.ipcRenderer = ipcRenderer;
         console.log('✅ Electron APIs initialized successfully');
       } catch (error) {
         console.warn('❌ Failed to initialize Electron APIs:', error);
@@ -63,6 +65,22 @@ class ElectronApiWrapper implements ElectronApi {
     } else {
       console.log('🌐 Running in web browser mode - using mocks');
     }
+  }
+
+  send(channel: string, ...args: any[]) {
+    if (this.isElectron && this.ipcRenderer) {
+      this.ipcRenderer.send(channel, ...args);
+    } else {
+      console.log(`[Mock IPC] Sending to ${channel}:`, args);
+    }
+  }
+
+  on(channel: string, listener: (event: any, ...args: any[]) => void) {
+    if (this.isElectron && this.ipcRenderer) {
+      this.ipcRenderer.on(channel, listener);
+      return () => this.ipcRenderer.removeListener(channel, listener);
+    }
+    return () => {};
   }
 
   spawn(command: string, args: string[]): ElectronProcess {

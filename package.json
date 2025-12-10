@@ -11,6 +11,7 @@
     "@heroicons/react": "^2.2.0",
     "electron-is-dev": "^3.0.1",
     "electron-store": "^10.1.0",
+    "electron-updater": "^6.6.2",
     "framer-motion": "^12.23.16",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
@@ -63,7 +64,7 @@
     "@types/node": "^16.18.126",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
-    "autoprefixer": "^10.5.0",
+    "autoprefixer": "^10.4.22",
     "concurrently": "^9.2.1",
     "electron": "^38.1.2",
     "electron-builder": "^26.0.12",
@@ -74,6 +75,13 @@
   "build": {
     "appId": "com.youtube.downloader",
     "productName": "YouTubeDownloader",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "tebansalas97",
+        "repo": "MultiPlatform-Downloader"
+      }
+    ],
     "directories": {
       "output": "dist"
     },

@@ -4,6 +4,7 @@ import { TitleBar } from './components/Layout/TitleBar';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { KeyboardShortcutsHelp } from './components/ui/KeyboardShortcutsHelp';
 import { QuickSettings } from './components/ui/QuickSettings';
+import { UpdateNotification } from './components/ui/UpdateNotification';
 import { checkEnvironment, electronApi } from './utils/electronApi';
 import { isWebMode, showWebModeWarning } from './config/webMode';
 import { useTheme } from './hooks/useTheme';
@@ -76,6 +77,7 @@ function App() {
       </ErrorBoundary>
       <KeyboardShortcutsHelp />
       <QuickSettings />
+      <UpdateNotification />
     </div>
   );
 }

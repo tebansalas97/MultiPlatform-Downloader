@@ -1,4 +1,5 @@
 const { app, BrowserWindow, ipcMain, dialog, shell, net } = require('electron');
+const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const isDev = require('electron-is-dev');
 
@@ -386,7 +387,63 @@ ipcMain.handle('proxy-video-stream', async (event, streamUrl) => {
 app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors');
 app.commandLine.appendSwitch('disable-site-isolation-trials');
 
-app.whenReady().then(createWindow);
+// ✅ Configuración de Auto-Updater
+function setupAutoUpdater() {
+  // Configuración básica
+  autoUpdater.autoDownload = false;
+  autoUpdater.allowPrerelease = false;
+
+  // Eventos del AutoUpdater
+  autoUpdater.on('checking-for-update', () => {
+    if (mainWindow) mainWindow.webContents.send('update-status', 'checking');
+  });
+
+  autoUpdater.on('update-available', (info) => {
+    if (mainWindow) mainWindow.webContents.send('update-available', info);
+  });
+
+  autoUpdater.on('update-not-available', () => {
+    if (mainWindow) mainWindow.webContents.send('update-status', 'not-available');
+  });
+
+  autoUpdater.on('error', (err) => {
+    if (mainWindow) mainWindow.webContents.send('update-error', err.message);
+  });
+
+  autoUpdater.on('download-progress', (progressObj) => {
+    if (mainWindow) mainWindow.webContents.send('update-progress', progressObj);
+  });
+
+  autoUpdater.on('update-downloaded', () => {
+    if (mainWindow) mainWindow.webContents.send('update-downloaded');
+  });
+
+  // IPC handlers para controlar la actualización desde la UI
+  ipcMain.on('check-for-updates', () => {
+    if (!isDev) {
+      autoUpdater.checkForUpdates();
+    }
+  });
+
+  ipcMain.on('download-update', () => {
+    autoUpdater.downloadUpdate();
+  });
+
+  ipcMain.on('install-update', () => {
+    autoUpdater.quitAndInstall();
+  });
+}
+
+// Inicializar AutoUpdater
+setupAutoUpdater();
+
+app.whenReady().then(() => {
+  createWindow();
+  // Chequear actualizaciones al iniciar (solo en producción)
+  if (!isDev) {
+    setTimeout(() => autoUpdater.checkForUpdates(), 3000);
+  }
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
