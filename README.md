@@ -4,7 +4,7 @@
 [![Electron](https://img.shields.io/badge/Electron-38.1.2-47848F?logo=electron)](https://www.electronjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-4.9.5-3178C6?logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4.17-06B6D4?logo=tailwindcss)](https://tailwindcss.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 Una aplicacion de escritorio moderna para descargar videos de multiples plataformas con una interfaz intuitiva y potente sistema de gestion de descargas.
 
@@ -204,7 +204,9 @@ winget install --id=Gyan.FFmpeg -e --force
 
 ## Licencia
 
-Este proyecto esta bajo la Licencia MIT - ver [LICENSE](LICENSE) para mas detalles.
+Este proyecto esta bajo la **GNU Affero General Public License v3.0 (AGPL-3.0)** - ver [LICENSE](LICENSE) para mas detalles.
+
+Esto significa que cualquier persona que modifique, distribuya o use este software como servicio en red **debe publicar el codigo fuente** de sus cambios bajo la misma licencia, garantizando que el proyecto y todos sus derivados permanezcan siempre como software libre y de codigo abierto.
 
 ## Agradecimientos
 

@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s https://www.gnu.org/licenses/agpl-3.0.txt -o \"C:\\\\Users\\\\Esteban\\\\Desktop\\\\Contenido\\\\nuevo youtube Download\\\\MultiPlatform-Downloader\\\\LICENSE\")"
+    ]
+  }
+}
